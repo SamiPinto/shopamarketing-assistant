@@ -1,0 +1,57 @@
+/* Print: only the report document is printed, styled as a clean A4 document.
+   "Save as PDF" in the print dialog produces a PDF with no backend required. */
+@page {
+  size: A4;
+  margin: 18mm 16mm;
+}
+
+@media print {
+  body {
+    background: #fff !important;
+  }
+
+  .sidebar,
+  .topbar,
+  .skip-link,
+  .no-print {
+    display: none !important;
+  }
+
+  .dashboard {
+    display: block;
+  }
+
+  .dashboard__main {
+    padding: 0;
+  }
+
+  .module-transition {
+    max-width: none;
+    animation: none;
+  }
+
+  .report-document {
+    max-width: none;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    font-size: 10.5pt;
+  }
+
+  .report-document__title {
+    font-size: 26pt;
+  }
+
+  .report-document__section h2 {
+    break-after: avoid-page;
+  }
+
+  .report-document__section li {
+    break-inside: avoid;
+  }
+
+  .report-document__demo {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

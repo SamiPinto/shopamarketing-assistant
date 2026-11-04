@@ -1,0 +1,84 @@
+/* Design tokens. Every colour in the UI is referenced through these variables.
+   Brand: Shopa Marketing purple gradient (#6A3DFF → #A100FF). */
+:root {
+  /* Neutrals — cool near-black on soft lavender-white */
+  --ink: #15121d;
+  --ink-2: #2a2636;
+  --ink-3: #47425a;
+  --muted: #6a6581;
+  --faint: #8f8aa5;
+  --line: #e7e4f0;
+  --line-strong: #d4cfe3;
+  --paper: #f7f6fb;
+  --paper-2: #efedf7;
+  --surface: #ffffff;
+
+  /* Deep brand night — used for the Insight panel and dark surfaces */
+  --night: #150d2e;
+  --on-ink: #f6f3ff;
+  --on-ink-muted: #b8b0d6;
+  --on-ink-line: #2f2652;
+
+  /* Brand */
+  --brand-1: #6a3dff;
+  --brand-2: #a100ff;
+  --brand-gradient: linear-gradient(120deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --accent: #7b2fff;
+  --accent-strong: #5b1fd6;
+  --accent-wash: #f2ecff;
+  --accent-line: #d9c8ff;
+
+  /* Status (always paired with an icon and a text label) */
+  --good: #1f7a55;
+  --good-wash: #e5f4ec;
+  --good-line: #bfe0cf;
+  --attention: #a35a00;
+  --attention-wash: #fdf1df;
+  --attention-line: #f0d2a3;
+  --absent: #6a6581;
+  --absent-wash: #f0eef6;
+  --absent-line: #dcd8e8;
+  --info: #3653a6;
+  --info-wash: #e9eefb;
+  --info-line: #c8d3f0;
+  --detected: #1f6385;
+  --detected-wash: #e3f1f8;
+  --detected-line: #bcdcea;
+  --danger: #b4281e;
+
+  --focus: #6a3dff;
+
+  /* Type */
+  --font-sans: ui-sans-serif, 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Outfit Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-2xs: 10.5px;
+  --text-xs: 11.5px;
+  --text-sm: 12.5px;
+  --text-md: 13.5px;
+  --text-lg: 15px;
+  --text-xl: 18px;
+  --text-2xl: 22px;
+  --text-3xl: 28px;
+  --text-4xl: 36px;
+
+  /* Shape & depth */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(21, 18, 29, 0.06);
+  --shadow: 0 1px 2px rgba(21, 18, 29, 0.05), 0 8px 24px -12px rgba(60, 20, 140, 0.18);
+  --shadow-lg: 0 24px 64px -24px rgba(40, 10, 100, 0.35);
+  --shadow-brand: 0 8px 20px -8px rgba(106, 61, 255, 0.55);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}
