@@ -96,12 +96,6 @@ export default function ClientReportModule({ analysis }: ModuleProps) {
               </li>
             ))}
           </ol>
-          <h3 className="talking__sub">Questions to ask</h3>
-          <ul className="talking__questions">
-            {report.questions.map((q) => (
-              <li key={q}>{q}</li>
-            ))}
-          </ul>
           <Button block icon={Copy} onClick={() => void copy('talking', talkingPoints)}>
             {copied === 'talking' ? 'Copied' : 'Copy Talking Points'}
           </Button>

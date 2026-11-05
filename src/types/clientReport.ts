@@ -50,7 +50,5 @@ export interface ClientReport {
   strengths: string[]
   improvements: ClientImprovement[]
   nextSteps: string[]
-  /** Discovery questions for the salesperson (screen only, not printed). */
-  questions: string[]
   disclaimer: string
 }

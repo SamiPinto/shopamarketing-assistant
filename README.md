@@ -24,8 +24,8 @@ The main sales workflow takes one click:
    - a branded 1–2 page *Website Opportunity Snapshot*, with an at-a-glance
      summary, what's working well and the **top 3–5 improvements** (what we found,
      why it matters, how Shopa can help)
-   - a **Sales talking points** panel (on screen only, never printed) with one
-     line per improvement and questions to ask the prospect
+   - a **Sales talking points** panel (on screen only, never printed) with an
+     opening pitch and one line per improvement
 4. Click **Print / Save PDF** to send or bring the report, or **Copy Talking
    Points** to prepare for the call.
 
@@ -47,7 +47,7 @@ The product never claims more than the page shows:
 
 | Area | What it does |
 | --- | --- |
-| Client Report | One-click branded A4 snapshot (1–2 pages). It covers the top 3–5 improvements, ranked by sales value, and fills in honest "growth ideas" when a site has few gaps. On screen it adds talking points and discovery questions. Print/Save PDF, Copy, Export |
+| Client Report | One-click branded A4 snapshot (1–2 pages). It covers the top 3–5 improvements, ranked by sales value, and fills in honest "growth ideas" when a site has few gaps. On screen it adds talking points. Print/Save PDF, Copy, Export |
 | Popup | Detects the current site; Generate Report; real progress steps; summary of results; opportunities; Demo toggle; recent analyses |
 | Website intelligence (for selling websites) | **Technology** (WordPress/Wix/Shopify/Squarespace/Webflow/Next.js and more, with versions; old jQuery/Bootstrap/WordPress flagged as outdated) · **Page speed** measured in the browser (LCP, CLS, full load, page weight; optional Google PageSpeed score) · **Mobile responsive** · **Design freshness** score (heuristic) · **Last updated** (modified dates or copyright year) · **Online since** (domain registration or first archive capture) · **Domain provider** (registrar) · **Hosting provider**, plus CDN, DNS and email providers · a **Website upgrade opportunity** rating (strong / moderate / low) |
 | Sales pitch | Two lines in the client report and talking points: a diagnosis from the evidence, then the Shopa offer. It leads with a website rebuild or refresh when the evidence supports one, and otherwise moves to growth services |

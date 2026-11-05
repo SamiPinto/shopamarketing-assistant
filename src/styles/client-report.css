@@ -340,15 +340,6 @@
   color: var(--ink-3);
 }
 
-.talking__questions {
-  display: grid;
-  gap: 6px;
-  list-style: disc;
-  padding-left: 18px;
-  font-size: var(--text-sm);
-  color: var(--ink-3);
-}
-
 @media (max-width: 1180px) {
   .client-layout {
     grid-template-columns: minmax(0, 1fr);

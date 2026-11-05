@@ -388,28 +388,6 @@ function buildImprovements(a: MarketingAnalysis): ClientImprovement[] {
   return list
 }
 
-function buildQuestions(a: MarketingAnalysis): string[] {
-  const q = [
-    'What are your main business goals for the next 6–12 months?',
-    'Which services or products would you most like to grow?',
-    a.business.location
-      ? `Do most of your customers come from around ${a.business.location.label}, or further afield?`
-      : 'Which areas do most of your customers come from?',
-  ]
-  q.push(
-    a.page.tracking.googleAds || a.page.tracking.metaPixel
-      ? 'How are your current ads performing, and who manages them?'
-      : 'Have you run Google or social media ads before? How did they go?',
-  )
-  if (!a.page.tracking.googleAnalytics && !a.page.tracking.googleTagManager) {
-    q.push('How do you currently track enquiries that come from your website?')
-  }
-  if (FEATURES.ooh && hasPhysicalFootprint(a.business)) {
-    q.push('Have you considered outdoor advertising, like billboards or shopping-centre screens?')
-  }
-  return q.slice(0, 6)
-}
-
 /** What a better website would win for this business, from its main CTA. */
 function conversionGoal(a: MarketingAnalysis): string {
   const intents = a.page.ctas.map((c) => c.intent)
@@ -516,7 +494,6 @@ export function buildClientReport(
       'A full audit of your website, Google presence and competitors',
       'A tailored plan with clear priorities and options to suit your budget',
     ],
-    questions: buildQuestions(a),
     disclaimer: `This snapshot is based on an automated review of publicly visible information on your homepage on ${formatDate(a.analysedAt)}. Some items may exist elsewhere on your website or online. It is a starting point for discussion, not a full audit, and no results are guaranteed.`,
   }
 }
@@ -567,8 +544,5 @@ export function talkingPointsToText(r: ClientReport): string {
     ...r.pitch,
     '',
     ...r.improvements.map((i, n) => `${n + 1}. ${i.talkingPoint}`),
-    '',
-    'Questions to ask:',
-    ...r.questions.map((q) => `- ${q}`),
   ].join('\n')
 }
