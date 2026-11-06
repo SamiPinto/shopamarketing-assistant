@@ -1,4 +1,4 @@
-import type { Rating3, WebsiteProfile } from '../../types/analysis'
+import type { AiGap, Rating3, WebsiteProfile } from '../../types/analysis'
 import type { PageExtraction, TechItem } from '../../types/page'
 import { listJoin } from '../../utils/format'
 
@@ -77,37 +77,65 @@ function responsiveOf(page: PageExtraction): WebsiteProfile['responsive'] {
   return { rating, label, reasons }
 }
 
+/** Customer details (hours, area, reviews) the page doesn't show; empty when not checked. */
+export function missingCustomerDetails(page: PageExtraction): string[] {
+  const s = page.aiSignals
+  if (!s) return []
+  return ([['opening hours', s.openingHours], ['service area', s.serviceArea], ['reviews', s.reviews]] as const)
+    .filter(([, found]) => !found)
+    .map(([name]) => name)
+}
+
 /**
  * How easily AI answer engines (ChatGPT, Google AI Overviews, Perplexity) can
- * understand the business from this page. Page signals only: robots.txt rules
- * for AI crawlers are not checked.
+ * understand the business from this page: page signals, plus the site's
+ * robots.txt rules for AI crawlers and the text present before JavaScript runs.
  */
 function aiFriendlyOf(page: PageExtraction): NonNullable<WebsiteProfile['aiFriendly']> {
-  const { schema, headings } = page
+  const { schema, headings, aiSignals: ai } = page
   const present: string[] = []
   const missing: string[] = []
+  const gaps: AiGap[] = []
   let points = 0
-  const check = (ok: boolean, weight: number, good: string, gap: string) => {
+  let possible = 0
+  // `ok` is null when a signal couldn't be checked (older analyses, failed
+  // requests); it then counts neither way.
+  const check = (ok: boolean | null, weight: number, id: AiGap, good: string, gap: string) => {
+    if (ok === null) return
+    possible += weight
     if (ok) {
       points += weight
       present.push(good)
-    } else missing.push(gap)
+    } else {
+      missing.push(gap)
+      gaps.push(id)
+    }
   }
   // Older analyses predate questionCount; fall back to question headings.
   const questions = page.questionCount ?? [...headings.h2, ...headings.h3].filter((h) => h.trim().endsWith('?')).length
+  const blocked = ai?.robots.blockedCrawlers ?? []
+  const missingDetails = missingCustomerDetails(page)
 
   // Highest weight first, so the detail line leads with what matters most.
-  check(schema.blockCount > 0, 3, 'Structured data (schema.org)', 'No structured data')
-  check(Boolean(schema.name && (schema.telephone || schema.streetAddress || schema.locality)), 2, 'Business details in structured data', 'Business details not in structured data')
-  check(schema.types.includes('FAQPage') || questions >= 2, 2, 'Question-and-answer content', 'No question-and-answer content')
-  check(page.wordCount >= 300, 2, 'Enough text to explain the business', 'Little text for AI to read')
-  check(page.title.length >= 10 && Boolean(page.metaDescription), 1, 'Descriptive title and description', 'Missing page title or description')
-  check(headings.h1.length === 1, 1, 'One clear main heading', headings.h1.length ? 'More than one main heading' : 'No main heading')
-  check(headings.h2.length >= 2, 1, 'Organised into sections', 'Not organised into sections')
+  check(ai && ai.robots.status !== 'unavailable' ? blocked.length === 0 : null, 3, 'ai-blocked', 'AI tools allowed to read the site', `Blocks AI tools (${listJoin(blocked)})`)
+  check(schema.blockCount > 0, 3, 'schema', 'Structured data (schema.org)', 'No structured data')
+  check(Boolean(schema.name && (schema.telephone || schema.streetAddress || schema.locality)), 2, 'business-schema', 'Business details in structured data', 'Business details not in structured data')
+  check(schema.types.includes('FAQPage') || questions >= 2, 2, 'faq', 'Question-and-answer content', 'No question-and-answer content')
+  check(page.wordCount >= 300, 2, 'text', 'Enough text to explain the business', 'Little text for AI to read')
+  // Only meaningful when the browser shows a fair amount of text.
+  check(ai && ai.rawWordCount !== null && page.wordCount >= 150 ? ai.rawWordCount >= page.wordCount * 0.5 : null, 2, 'js-only', 'Text readable without JavaScript', 'Text only appears after JavaScript runs')
+  check(ai ? missingDetails.length <= 1 : null, 2, 'customer-info', 'Hours, area or reviews shown', `No ${listJoin(missingDetails, 'or')} shown`)
+  check(page.title.length >= 10 && Boolean(page.metaDescription), 1, 'title-description', 'Descriptive title and description', 'Missing page title or description')
+  check(headings.h1.length === 1, 1, 'h1', 'One clear main heading', headings.h1.length ? 'More than one main heading' : 'No main heading')
+  check(headings.h2.length >= 2, 1, 'sections', 'Organised into sections', 'Not organised into sections')
 
-  const rating: Rating3 = points >= 9 ? 'good' : points >= 5 ? 'fair' : 'poor'
+  // Same thresholds as the original 7 checks (9 and 5 of 12 points).
+  const share = possible ? points / possible : 0
+  let rating: Rating3 = share >= 0.75 ? 'good' : share >= 5 / 12 ? 'fair' : 'poor'
+  // A site that blocks AI tools can't be called AI friendly, whatever else it does.
+  if (blocked.length && rating === 'good') rating = 'fair'
   const label = { good: 'AI friendly', fair: 'Partly AI friendly', poor: 'Not AI friendly', unknown: 'Unknown' }[rating]
-  return { rating, label, present, missing }
+  return { rating, label, present, missing, gaps }
 }
 
 function lastUpdatedOf(page: PageExtraction): WebsiteProfile['lastUpdated'] {

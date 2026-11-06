@@ -45,9 +45,9 @@ export function plural(count: number, singular: string, pluralForm = `${singular
   return `${count} ${count === 1 ? singular : pluralForm}`
 }
 
-export function listJoin(items: string[]): string {
+export function listJoin(items: string[], conjunction = 'and'): string {
   if (items.length <= 1) return items.join('')
-  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
+  return `${items.slice(0, -1).join(', ')} ${conjunction} ${items[items.length - 1]}`
 }
 
 export function truncate(value: string, max: number): string {

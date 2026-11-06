@@ -132,6 +132,16 @@ export interface FreshnessSignals {
   serverLastModified: string | null
 }
 
+export interface AiSignals {
+  /** robots.txt rules for AI crawlers. 'none' means the site has no file, so nothing is blocked. */
+  robots: { status: 'found' | 'none' | 'unavailable'; blockedCrawlers: string[] }
+  /** Words in the page's HTML before JavaScript runs; null if it couldn't be fetched again. */
+  rawWordCount: number | null
+  openingHours: boolean
+  serviceArea: boolean
+  reviews: boolean
+}
+
 export interface PageExtraction {
   url: string
   domain: string
@@ -162,6 +172,8 @@ export interface PageExtraction {
   wordCount: number
   /** Distinct question-style texts (FAQ items, accordions, headings). Missing on older analyses. */
   questionCount?: number
+  /** Signals for the AI-friendly check. Missing on older and demo analyses. */
+  aiSignals?: AiSignals
   /** True when extraction hit the configured element limits. */
   truncated: boolean
   extractedAt: string

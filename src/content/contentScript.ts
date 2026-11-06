@@ -1,8 +1,9 @@
 /**
  * Content script — injected on demand (never on every page) when a user clicks
- * "Analyse Website". It only reads publicly rendered DOM content of the current
- * page: no network requests, no form interaction, no storage access, and
- * nothing behind logins is fetched.
+ * "Analyse Website". It reads publicly rendered DOM content of the current
+ * page. Its only network requests are two same-origin reads for the AI-friendly
+ * check (robots.txt and a plain copy of this page); no form interaction, no
+ * storage access, and nothing behind logins is fetched.
  */
 import {
   AU_ADDRESS_PATTERN,
@@ -10,12 +11,14 @@ import {
   EMAIL_PATTERN,
   classifyCta,
   classifySocialUrl,
+  blockedAiCrawlers,
   normaliseWhitespace,
 } from '../utils/signals'
 import { EXTRACT_MESSAGE } from '../types/misc'
 import { designSignals, detectTech, freshnessSignals, measurePerformance } from './detectors'
 import type { ContentRequest, ContentResponse } from '../types/misc'
 import type {
+  AiSignals,
   CtaSignal,
   FormSummary,
   PageExtraction,
@@ -36,6 +39,7 @@ const LIMITS = {
   inlineScripts: 60,
   inlineScriptChars: 20_000,
   questionCandidates: 400,
+  fetchMs: 3000,
 }
 
 let truncated = false
@@ -266,6 +270,66 @@ function tracking(): TrackingSignals {
   }
 }
 
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), LIMITS.fetchMs)
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+/** Which AI crawlers the site's robots.txt blocks. */
+async function robotsSignal(): Promise<AiSignals['robots']> {
+  try {
+    const res = await fetchWithTimeout(new URL('/robots.txt', location.origin).href, { credentials: 'omit' })
+    if (res.status === 404 || res.status === 410) return { status: 'none', blockedCrawlers: [] }
+    if (!res.ok) return { status: 'unavailable', blockedCrawlers: [] }
+    const text = await res.text()
+    // Some sites answer with an HTML "not found" page instead of a 404.
+    if (/^\s*</.test(text)) return { status: 'none', blockedCrawlers: [] }
+    return { status: 'found', blockedCrawlers: blockedAiCrawlers(text) }
+  } catch {
+    return { status: 'unavailable', blockedCrawlers: [] }
+  }
+}
+
+/** Words in this page's HTML as served, before any JavaScript runs. */
+async function rawWordCount(): Promise<number | null> {
+  try {
+    const res = await fetchWithTimeout(location.href, { credentials: 'same-origin' })
+    if (!res.ok || !/html/i.test(res.headers.get('content-type') ?? '')) return null
+    // DOMParser never runs the page's scripts.
+    const doc = new DOMParser().parseFromString(await res.text(), 'text/html')
+    doc.querySelectorAll('script, style, noscript, template').forEach((el) => el.remove())
+    return (doc.body?.textContent ?? '').split(/\s+/).filter(Boolean).length
+  } catch {
+    return null
+  }
+}
+
+const HOURS_PATTERN =
+  /\b(opening hours|business hours|trading hours|office hours|hours of operation|open 7 days|24\/7)\b|\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\b[^\n]{0,40}?\b\d{1,2}(:\d{2})?\s?(am|pm)\b/i
+const SERVICE_AREA_PATTERN = /\b(serving|we serve|service areas?|areas we (serve|cover)|servicing|located in|based in)\b/i
+const REVIEWS_PATTERN = /\b(testimonials?|reviews?|what our (clients|customers|patients) say)\b|★/i
+const REVIEW_WIDGET_PATTERN = /trustindex|elfsight|trustpilot|reviews\.io|birdeye|judge\.me|yotpo|okendo|stamped\.io/i
+
+/** Details customers often ask AI tools about: opening hours, service area and reviews. */
+function customerDetails(bodyText: string, addresses: string[]): Pick<AiSignals, 'openingHours' | 'serviceArea' | 'reviews'> {
+  const ld = Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+    .map((s) => s.textContent ?? '')
+    .join(' ')
+  const embeds = Array.from(document.querySelectorAll<HTMLScriptElement | HTMLIFrameElement>('script[src], iframe[src]'))
+    .map((el) => el.src)
+    .join(' ')
+  return {
+    openingHours: /"openingHours/i.test(ld) || HOURS_PATTERN.test(bodyText),
+    serviceArea: /"(areaServed|address)"/i.test(ld) || addresses.length > 0 || SERVICE_AREA_PATTERN.test(bodyText),
+    reviews: /"(aggregateRating|review)"/i.test(ld) || REVIEW_WIDGET_PATTERN.test(embeds) || REVIEWS_PATTERN.test(bodyText),
+  }
+}
+
 /**
  * Counts distinct questions shown as FAQ items: headings, accordion toggles
  * (<summary>, buttons, aria-expanded) and text inside FAQ/accordion blocks.
@@ -299,7 +363,8 @@ export async function extract(): Promise<PageExtraction> {
   const { ctas: ctaSignals, buttonCount } = ctas()
   const contact = contacts(links.anchors, bodyText)
   const schemaResult = schema()
-  const performanceSignals = await measurePerformance()
+  const addresses = addressCandidates(bodyText)
+  const [performanceSignals, robots, rawWords] = await Promise.all([measurePerformance(), robotsSignal(), rawWordCount()])
 
   return {
     url: location.href,
@@ -322,7 +387,7 @@ export async function extract(): Promise<PageExtraction> {
     phones: contact.phones,
     emails: contact.emails,
     socialLinks: socialLinks(links.anchors),
-    addressCandidates: addressCandidates(bodyText),
+    addressCandidates: addresses,
     schema: schemaResult.summary,
     openGraph: {
       title: meta('meta[property="og:title"]'),
@@ -337,6 +402,7 @@ export async function extract(): Promise<PageExtraction> {
     freshness: freshnessSignals(bodyText, schemaResult.dateModified),
     wordCount: bodyText.split(/\s+/).filter(Boolean).length,
     questionCount: questionCount(),
+    aiSignals: { robots, rawWordCount: rawWords, ...customerDetails(bodyText, addresses) },
     truncated,
     extractedAt: new Date().toISOString(),
     source: 'live',

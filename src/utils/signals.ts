@@ -94,3 +94,44 @@ export const AU_ADDRESS_PATTERN =
 export function normaliseWhitespace(value: string): string {
   return value.replace(/\s+/g, ' ').trim()
 }
+
+/** AI crawlers checked in robots.txt, mapped to the product each one feeds. */
+export const AI_CRAWLERS: Record<string, string> = {
+  GPTBot: 'ChatGPT',
+  'OAI-SearchBot': 'ChatGPT search',
+  ClaudeBot: 'Claude',
+  PerplexityBot: 'Perplexity',
+  'Google-Extended': 'Google Gemini',
+  CCBot: 'Common Crawl',
+}
+
+/**
+ * AI crawlers (from AI_CRAWLERS) that robots.txt blocks from the whole site.
+ * A crawler follows its own group if one names it, otherwise the "*" group.
+ */
+export function blockedAiCrawlers(robotsTxt: string): string[] {
+  const groups: { agents: string[]; rules: { allow: boolean; path: string }[] }[] = []
+  let current: (typeof groups)[number] | null = null
+  let lastWasAgent = false
+  for (const raw of robotsTxt.split(/\r?\n/)) {
+    const match = /^([a-z-]+)\s*:\s*(.*)$/i.exec(raw.replace(/#.*/, '').trim())
+    if (!match) continue
+    const key = match[1].toLowerCase()
+    const value = match[2].trim()
+    if (key === 'user-agent') {
+      // Consecutive user-agent lines share one group of rules.
+      if (!current || !lastWasAgent) groups.push((current = { agents: [], rules: [] }))
+      current.agents.push(value.toLowerCase())
+      lastWasAgent = true
+    } else {
+      lastWasAgent = false
+      if (current && (key === 'allow' || key === 'disallow')) current.rules.push({ allow: key === 'allow', path: value })
+    }
+  }
+  const blocksSite = (g: (typeof groups)[number]) =>
+    g.rules.some((r) => !r.allow && r.path === '/') && !g.rules.some((r) => r.allow && r.path === '/')
+  return Object.keys(AI_CRAWLERS).filter((crawler) => {
+    const own = groups.filter((g) => g.agents.includes(crawler.toLowerCase()))
+    return (own.length ? own : groups.filter((g) => g.agents.includes('*'))).some(blocksSite)
+  })
+}

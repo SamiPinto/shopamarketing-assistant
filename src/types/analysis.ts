@@ -105,6 +105,18 @@ export interface Insight {
 
 export type Rating3 = 'good' | 'fair' | 'poor' | 'unknown'
 
+export type AiGap =
+  | 'ai-blocked'
+  | 'schema'
+  | 'business-schema'
+  | 'faq'
+  | 'text'
+  | 'js-only'
+  | 'customer-info'
+  | 'title-description'
+  | 'h1'
+  | 'sections'
+
 /** Website-sales view of the page: stack, speed, mobile, design and freshness. */
 export interface WebsiteProfile {
   platform: string | null
@@ -120,7 +132,8 @@ export interface WebsiteProfile {
   }
   responsive: { rating: Rating3; label: string; reasons: string[] }
   /** How readable the page is for AI answer engines. Missing on analyses saved before this check existed. */
-  aiFriendly?: { rating: Rating3; label: string; present: string[]; missing: string[] }
+  /** `gaps` lists the failed checks in the same order as `missing`. */
+  aiFriendly?: { rating: Rating3; label: string; present: string[]; missing: string[]; gaps?: AiGap[] }
   design: { rating: 'modern' | 'dated' | 'outdated'; score: number; modernSignals: string[]; datedSignals: string[] }
   lastUpdated: { year: number | null; label: string; basis: string; stale: boolean }
   /** How strong the case for a website rebuild/refresh is. */

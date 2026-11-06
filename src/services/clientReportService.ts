@@ -1,9 +1,10 @@
-import type { CategoryId, CategoryStatus, Check, MarketingAnalysis } from '../types/analysis'
+import type { AiGap, CategoryId, CategoryStatus, Check, MarketingAnalysis } from '../types/analysis'
 import type { ClientImprovement, ClientReport, ComparisonRow, GlanceItem, GlanceStatus } from '../types/clientReport'
 import type { WebsiteIntel } from '../types/intel'
 import { formatDate, listJoin, plural } from '../utils/format'
-import { PRIMARY_CTA_INTENTS, SOCIAL_LABELS } from '../utils/signals'
+import { AI_CRAWLERS, PRIMARY_CTA_INTENTS, SOCIAL_LABELS } from '../utils/signals'
 import { hasPhysicalFootprint } from './analysis/business'
+import { missingCustomerDetails } from './analysis/websiteProfile'
 import { FEATURES } from '../config/features'
 import { findCheck } from './analysis/scoring'
 import { buildWebsiteFacts } from './websiteFacts'
@@ -326,8 +327,61 @@ function allChecks(a: MarketingAnalysis): Check[] {
   return Object.values(a.categories).flatMap((c) => c.checks)
 }
 
+/** One talking-point sentence per failed AI-friendly check, using this page's details. */
+const AI_GAP_SENTENCES: Record<AiGap, (a: MarketingAnalysis) => string> = {
+  'ai-blocked': (a) => {
+    const tools = [...new Set((a.page.aiSignals?.robots.blockedCrawlers ?? []).map((c) => AI_CRAWLERS[c] ?? c))]
+    return `Your website tells AI tools (${listJoin(tools)}) not to read it, so they can’t use your site when recommending businesses.`
+  },
+  'js-only': () =>
+    'Most of your homepage text only appears after JavaScript runs. Many AI tools don’t run JavaScript, so they may see an almost empty page.',
+  'customer-info': (a) =>
+    `AI tools can’t find your ${listJoin(missingCustomerDetails(a.page), 'or')} on your homepage — details customers often check before choosing a business.`,
+  schema: () => 'Your site has no structured data — the behind-the-scenes code AI tools read to understand what a business is and does.',
+  'business-schema': (a) =>
+    `Your ${a.page.schema.name ? 'phone number and address aren’t' : 'business name and contact details aren’t'} in a format AI tools can read, so they can’t easily confirm who you are or where to find you.`,
+  faq: () => 'There’s no FAQ section, so AI tools have no ready answers to the questions your customers are asking.',
+  text: (a) =>
+    `Your homepage has only around ${a.page.wordCount.toLocaleString('en-AU')} words of text, which gives AI tools little to go on when describing your services.`,
+  'title-description': (a) =>
+    a.page.metaDescription
+      ? 'Your page title is too short to tell AI tools what you do or where.'
+      : 'Your homepage has no search description — the short summary AI tools and Google use to describe your business.',
+  h1: (a) =>
+    a.page.headings.h1.length
+      ? `Your homepage has ${a.page.headings.h1.length} main headings instead of one, which blurs what your business is about.`
+      : 'Your homepage has no main heading, so AI tools have to guess what your business is about.',
+  sections: () => 'Your homepage isn’t broken into clear sections, which makes it harder for AI tools to pick out your services.',
+}
+
+/** Improvement for a homepage that AI answer engines would struggle to understand. */
+function aiImprovement(a: MarketingAnalysis): (ClientImprovement & { impact: number }) | null {
+  const ai = a.website.aiFriendly
+  if (!ai || ai.rating === 'good' || ai.rating === 'unknown') return null
+  const gaps = ai.missing.slice(0, 3).map((g) => g.charAt(0).toLowerCase() + g.slice(1))
+  return {
+    id: 'ai-friendly',
+    kind: 'found',
+    impact: 7,
+    title: 'Make your website easier for AI search to understand',
+    found: `${ai.label}: ${gaps.join('; ')}.`,
+    whyItMatters:
+      'AI tools such as ChatGPT and Google’s AI Overviews now answer many searches directly. They rely on websites that clearly describe the business and answer common questions.',
+    howShopaHelps: 'Add business structured data, clear headings and helpful FAQ content so AI tools can understand and recommend you.',
+    service: 'SEO & AI SEO',
+    talkingPoint: [
+      ai.rating === 'poor'
+        ? 'Your homepage isn’t set up for AI search tools like ChatGPT and Google’s AI Overviews.'
+        : 'Your homepage is only partly ready for AI search tools like ChatGPT.',
+      // The two most important gaps, one sentence each. Analyses saved before gap ids existed list the gaps instead.
+      ...(ai.gaps ? ai.gaps.slice(0, 2).map((gap) => AI_GAP_SENTENCES[gap](a)) : [`Gaps: ${gaps.slice(0, 2).join('; ')}.`]),
+    ].join(' '),
+  }
+}
+
 function buildImprovements(a: MarketingAnalysis): ClientImprovement[] {
   const checks = allChecks(a)
+  const ai = aiImprovement(a)
   const found = a.opportunities
     .filter((o) => o.certainty !== 'research')
     .map((o) => {
@@ -339,6 +393,9 @@ function buildImprovements(a: MarketingAnalysis): ClientImprovement[] {
       return { ...copy, id: key, found: FOUND[key]?.(a) ?? o.evidence, kind }
     })
     .filter((i): i is ClientImprovement & { impact: number } => i !== null)
+    // The AI point already covers structured data, so it replaces the schema point.
+    .filter((i) => !(ai && i.id === 'seo-schema'))
+    .concat(ai ? [ai] : [])
     // Evidenced findings first, then growth ideas; highest sales value first within each.
     .sort((x, y) => (x.kind === y.kind ? y.impact - x.impact : x.kind === 'found' ? -1 : 1))
     .slice(0, 5)
