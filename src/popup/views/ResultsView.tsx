@@ -57,7 +57,7 @@ export function ResultsView({ analysis, onBack, onViewOpportunities }: Props) {
 
       <div className="results__actions">
         <Button variant="primary" block icon={FileText} iconRight={ArrowRight} onClick={() => void openDashboard('client')}>
-          Generate Client Report
+          Sales Talking Points
         </Button>
         <div className="button-row">
           <Button icon={Lightbulb} onClick={onViewOpportunities}>

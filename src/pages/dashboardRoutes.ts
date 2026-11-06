@@ -14,7 +14,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react'
-import { FEATURES } from '../config/features'
+import { FEATURES, HIDDEN_SCREENS } from '../config/features'
 import type { CategoryId, MarketingAnalysis } from '../types/analysis'
 
 export const ROUTES = [
@@ -60,12 +60,12 @@ const ALL_ROUTES: RouteDefinition[] = [
   { id: 'local', label: 'Local', icon: MapPin, group: 'Analysis', category: 'local', component: lazy(() => import('../components/local/LocalModule')) },
   { id: 'ooh', label: 'OOH', icon: Signpost, group: 'Analysis', category: 'ooh', component: lazy(() => import('../components/ooh/OOHModule')) },
   { id: 'competitors', label: 'Competitors', icon: Users, group: 'Research', component: lazy(() => import('../components/competitors/CompetitorsModule')) },
-  { id: 'client', label: 'Client Report', icon: Presentation, group: 'Deliverables', component: lazy(() => import('../components/reports/ClientReportModule')) },
+  { id: 'client', label: 'Sales Talking Points', icon: Presentation, group: 'Deliverables', component: lazy(() => import('../components/reports/ClientReportModule')) },
   { id: 'strategy', label: 'Strategy', icon: Target, group: 'Deliverables', component: lazy(() => import('../components/strategy/StrategyModule')) },
   { id: 'report', label: 'Full Report', icon: FileText, group: 'Deliverables', component: lazy(() => import('../components/reports/ReportModule')) },
 ]
 
-const HIDDEN: RouteId[] = [...(FEATURES.ooh ? [] : (['ooh'] as const)), ...(FEATURES.competitors ? [] : (['competitors'] as const))]
+const HIDDEN: RouteId[] = [...(FEATURES.ooh ? [] : (['ooh'] as const)), ...(FEATURES.competitors ? [] : (['competitors'] as const)), ...HIDDEN_SCREENS]
 
 export const ROUTE_DEFINITIONS: RouteDefinition[] = ALL_ROUTES.filter((r) => !HIDDEN.includes(r.id))
 

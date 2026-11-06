@@ -4,12 +4,15 @@ import type { WebsiteIntel } from '../types/intel'
 export type FactTone = 'good' | 'attention' | 'neutral' | 'pending'
 
 export interface WebsiteFact {
-  id: 'platform' | 'online' | 'updated' | 'speed' | 'mobile' | 'design' | 'domain' | 'hosting'
+  id: 'platform' | 'online' | 'updated' | 'speed' | 'mobile' | 'ai' | 'design' | 'domain' | 'hosting'
   label: string
   value: string
   detail: string | null
   tone: FactTone
 }
+
+// Display order. The first row (four per row) is what salespeople check first.
+const ORDER: WebsiteFact['id'][] = ['speed', 'mobile', 'ai', 'platform', 'online', 'updated', 'design', 'domain', 'hosting']
 
 const monthYear = (iso: string) => new Date(iso).toLocaleDateString('en-AU', { month: 'short', year: 'numeric' })
 
@@ -78,6 +81,19 @@ export function buildWebsiteFacts(a: MarketingAnalysis, intel: WebsiteIntel | nu
     tone: w.responsive.rating === 'good' ? 'good' : 'attention',
   })
 
+  const ai = w.aiFriendly
+  facts.push(
+    ai
+      ? {
+          id: 'ai',
+          label: 'AI friendly',
+          value: { good: 'Yes', fair: 'Partly', poor: 'No', unknown: 'Unknown' }[ai.rating],
+          detail: (ai.rating === 'good' ? ai.present.slice(0, 2).join(', ') : ai.missing.slice(0, 2).join('; ')) || null,
+          tone: ai.rating === 'good' ? 'good' : 'attention',
+        }
+      : { id: 'ai', label: 'AI friendly', value: 'Not checked', detail: 'Analyse this website again to check', tone: 'neutral' },
+  )
+
   facts.push({
     id: 'design',
     label: 'Design (UI/UX)',
@@ -115,5 +131,5 @@ export function buildWebsiteFacts(a: MarketingAnalysis, intel: WebsiteIntel | nu
     facts.push(intelLoading ? pending('Hosting provider', 'hosting') : { id: 'hosting', label: 'Hosting provider', value: 'Unavailable', detail: h?.dnsProvider ? `DNS: ${h.dnsProvider}` : null, tone: 'neutral' })
   }
 
-  return facts
+  return facts.sort((x, y) => ORDER.indexOf(x.id) - ORDER.indexOf(y.id))
 }

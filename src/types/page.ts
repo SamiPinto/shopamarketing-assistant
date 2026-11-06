@@ -160,6 +160,8 @@ export interface PageExtraction {
   design: DesignSignals
   freshness: FreshnessSignals
   wordCount: number
+  /** Distinct question-style texts (FAQ items, accordions, headings). Missing on older analyses. */
+  questionCount?: number
   /** True when extraction hit the configured element limits. */
   truncated: boolean
   extractedAt: string

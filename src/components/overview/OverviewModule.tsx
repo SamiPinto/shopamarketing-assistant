@@ -1,5 +1,5 @@
 import { ArrowRight, FileText, Target } from 'lucide-react'
-import { FEATURES } from '../../config/features'
+import { FEATURES, HIDDEN_SCREENS } from '../../config/features'
 import type { ModuleProps } from '../../pages/dashboardRoutes'
 import { countSignals } from '../../services/analysis/opportunities'
 import { Button } from '../ui/Button'
@@ -28,11 +28,13 @@ export default function OverviewModule({ analysis, navigate }: ModuleProps) {
           </p>
           <div className="button-row">
             <Button variant="primary" icon={FileText} onClick={() => navigate('client')}>
-              Client Report
+              Sales Talking Points
             </Button>
-            <Button icon={Target} onClick={() => navigate('strategy')}>
-              Build Strategy
-            </Button>
+            {!HIDDEN_SCREENS.includes('strategy') && (
+              <Button icon={Target} onClick={() => navigate('strategy')}>
+                Build Strategy
+              </Button>
+            )}
           </div>
         </div>
         <div className="overview__categories">

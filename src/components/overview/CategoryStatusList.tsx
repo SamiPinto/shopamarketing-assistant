@@ -1,5 +1,5 @@
 import { ChevronRight } from 'lucide-react'
-import { VISIBLE_CATEGORIES } from '../../config/features'
+import { HIDDEN_SCREENS, VISIBLE_CATEGORIES } from '../../config/features'
 import type { CategoryId, MarketingAnalysis } from '../../types/analysis'
 import { plural } from '../../utils/format'
 import { StatusBadge } from '../ui/StatusBadge'
@@ -19,6 +19,8 @@ export function CategoryStatusList({ analysis, onSelect, showSummary = false, ca
         const category = analysis.categories[id]
         const Icon = CATEGORY_ICONS[id]
         const count = signalCount(analysis, id)
+        // Categories whose screen is hidden are listed but not clickable.
+        const select = HIDDEN_SCREENS.includes(id) ? undefined : onSelect
         const content = (
           <>
             <span className="category-row__icon">
@@ -31,14 +33,14 @@ export function CategoryStatusList({ analysis, onSelect, showSummary = false, ca
             <span className="category-row__meta">
               {count > 0 && <span className="category-row__count">{plural(count, 'signal')}</span>}
               <StatusBadge kind="category" status={category.status} compact />
-              {onSelect && <ChevronRight size={14} aria-hidden="true" className="category-row__chevron" />}
+              {select && <ChevronRight size={14} aria-hidden="true" className="category-row__chevron" />}
             </span>
           </>
         )
         return (
           <li key={id}>
-            {onSelect ? (
-              <button type="button" className="category-row category-row--interactive" onClick={() => onSelect(id)}>
+            {select ? (
+              <button type="button" className="category-row category-row--interactive" onClick={() => select(id)}>
                 {content}
               </button>
             ) : (

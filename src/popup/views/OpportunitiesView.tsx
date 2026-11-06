@@ -1,4 +1,5 @@
 import { ArrowLeft, FileText, Target } from 'lucide-react'
+import { HIDDEN_SCREENS } from '../../config/features'
 import { useOpenDashboard } from '../../hooks/useOpenDashboard'
 import type { MarketingAnalysis } from '../../types/analysis'
 import { Button } from '../../components/ui/Button'
@@ -34,9 +35,11 @@ export function OpportunitiesView({ analysis, onBack }: { analysis: MarketingAna
       </section>
 
       <div className="button-row button-row--sticky">
-        <Button icon={Target} onClick={() => void openDashboard('strategy')}>
-          Build Strategy
-        </Button>
+        {!HIDDEN_SCREENS.includes('strategy') && (
+          <Button icon={Target} onClick={() => void openDashboard('strategy')}>
+            Build Strategy
+          </Button>
+        )}
         <Button variant="primary" icon={FileText} onClick={() => void openDashboard('client')}>
           Generate Report
         </Button>

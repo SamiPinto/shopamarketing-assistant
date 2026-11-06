@@ -119,6 +119,8 @@ export interface WebsiteProfile {
     pageWeightKb: number | null
   }
   responsive: { rating: Rating3; label: string; reasons: string[] }
+  /** How readable the page is for AI answer engines. Missing on analyses saved before this check existed. */
+  aiFriendly?: { rating: Rating3; label: string; present: string[]; missing: string[] }
   design: { rating: 'modern' | 'dated' | 'outdated'; score: number; modernSignals: string[]; datedSignals: string[] }
   lastUpdated: { year: number | null; label: string; basis: string; stale: boolean }
   /** How strong the case for a website rebuild/refresh is. */

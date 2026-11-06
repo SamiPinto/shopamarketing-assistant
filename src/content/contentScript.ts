@@ -35,6 +35,7 @@ const LIMITS = {
   textChars: 150_000,
   inlineScripts: 60,
   inlineScriptChars: 20_000,
+  questionCandidates: 400,
 }
 
 let truncated = false
@@ -265,6 +266,26 @@ function tracking(): TrackingSignals {
   }
 }
 
+/**
+ * Counts distinct questions shown as FAQ items: headings, accordion toggles
+ * (<summary>, buttons, aria-expanded) and text inside FAQ/accordion blocks.
+ */
+function questionCount(): number {
+  const nodes = Array.from(
+    document.querySelectorAll(
+      'h2, h3, h4, h5, h6, summary, dt, button, [aria-expanded], [class*="faq" i] *, [id*="faq" i] *, [class*="accordion" i] *',
+    ),
+  )
+  if (nodes.length > LIMITS.questionCandidates) truncated = true
+  const questions = new Set<string>()
+  for (const node of nodes.slice(0, LIMITS.questionCandidates)) {
+    const text = normaliseWhitespace(node.textContent ?? '')
+    // A real question: ends in "?", at least four words, not a whole FAQ block.
+    if (text.endsWith('?') && text.length <= 200 && text.split(' ').length >= 4) questions.add(text.toLowerCase())
+  }
+  return questions.size
+}
+
 /** Exported for testing; the IIFE exposes it as ShopaContentScript.extract. */
 export async function extract(): Promise<PageExtraction> {
   truncated = false
@@ -315,6 +336,7 @@ export async function extract(): Promise<PageExtraction> {
     design: designSignals(),
     freshness: freshnessSignals(bodyText, schemaResult.dateModified),
     wordCount: bodyText.split(/\s+/).filter(Boolean).length,
+    questionCount: questionCount(),
     truncated,
     extractedAt: new Date().toISOString(),
     source: 'live',

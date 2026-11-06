@@ -77,6 +77,39 @@ function responsiveOf(page: PageExtraction): WebsiteProfile['responsive'] {
   return { rating, label, reasons }
 }
 
+/**
+ * How easily AI answer engines (ChatGPT, Google AI Overviews, Perplexity) can
+ * understand the business from this page. Page signals only: robots.txt rules
+ * for AI crawlers are not checked.
+ */
+function aiFriendlyOf(page: PageExtraction): NonNullable<WebsiteProfile['aiFriendly']> {
+  const { schema, headings } = page
+  const present: string[] = []
+  const missing: string[] = []
+  let points = 0
+  const check = (ok: boolean, weight: number, good: string, gap: string) => {
+    if (ok) {
+      points += weight
+      present.push(good)
+    } else missing.push(gap)
+  }
+  // Older analyses predate questionCount; fall back to question headings.
+  const questions = page.questionCount ?? [...headings.h2, ...headings.h3].filter((h) => h.trim().endsWith('?')).length
+
+  // Highest weight first, so the detail line leads with what matters most.
+  check(schema.blockCount > 0, 3, 'Structured data (schema.org)', 'No structured data')
+  check(Boolean(schema.name && (schema.telephone || schema.streetAddress || schema.locality)), 2, 'Business details in structured data', 'Business details not in structured data')
+  check(schema.types.includes('FAQPage') || questions >= 2, 2, 'Question-and-answer content', 'No question-and-answer content')
+  check(page.wordCount >= 300, 2, 'Enough text to explain the business', 'Little text for AI to read')
+  check(page.title.length >= 10 && Boolean(page.metaDescription), 1, 'Descriptive title and description', 'Missing page title or description')
+  check(headings.h1.length === 1, 1, 'One clear main heading', headings.h1.length ? 'More than one main heading' : 'No main heading')
+  check(headings.h2.length >= 2, 1, 'Organised into sections', 'Not organised into sections')
+
+  const rating: Rating3 = points >= 9 ? 'good' : points >= 5 ? 'fair' : 'poor'
+  const label = { good: 'AI friendly', fair: 'Partly AI friendly', poor: 'Not AI friendly', unknown: 'Unknown' }[rating]
+  return { rating, label, present, missing }
+}
+
 function lastUpdatedOf(page: PageExtraction): WebsiteProfile['lastUpdated'] {
   const year = new Date().getFullYear()
   const candidates: { year: number; basis: string }[] = []
@@ -166,6 +199,7 @@ export function buildWebsiteProfile(page: PageExtraction): WebsiteProfile {
     outdatedTech,
     speed,
     responsive,
+    aiFriendly: aiFriendlyOf(page),
     design,
     lastUpdated,
     rebuildFit: points >= 4 ? 'strong' : points >= 2 ? 'moderate' : 'low',
