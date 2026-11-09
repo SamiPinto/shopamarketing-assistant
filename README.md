@@ -48,7 +48,7 @@ The product never claims more than the page shows:
 | Area | What it does |
 | --- | --- |
 | Client Report | One-click branded A4 snapshot (1–2 pages). It covers the top 3–5 improvements, ranked by sales value, and fills in honest "growth ideas" when a site has few gaps. On screen it adds talking points. Print/Save PDF, Copy, Export |
-| Popup | Detects the current site; Generate Report; real progress steps; summary of results; opportunities; Demo toggle; recent analyses |
+| Popup | Detects the current site; Generate Report; real progress steps; summary of results; opportunities; recent analyses |
 | Website intelligence (for selling websites) | **Technology** (WordPress/Wix/Shopify/Squarespace/Webflow/Next.js and more, with versions; old jQuery/Bootstrap/WordPress flagged as outdated) · **Page speed** measured in the browser (LCP, CLS, full load, page weight; optional Google PageSpeed score) · **Mobile responsive** · **Design freshness** score (heuristic) · **Last updated** (modified dates or copyright year) · **Online since** (domain registration or first archive capture) · **Domain provider** (registrar) · **Hosting provider**, plus CDN, DNS and email providers · a **Website upgrade opportunity** rating (strong / moderate / low) |
 | Sales pitch | Two lines in the client report and talking points: a diagnosis from the evidence, then the Shopa offer. It leads with a website rebuild or refresh when the evidence supports one, and otherwise moves to growth services |
 | Competitors | Google search and Maps links to find real competitors. Analyse their sites, then compare them side by side (technology, speed, mobile, design, last updated, hosting, SEO, conversion). Linked competitors appear in the client report as "How you compare" |
@@ -61,7 +61,6 @@ The product never claims more than the page shows:
 | OOH | A module in its own right: campaign context, 8 environments (all marked "Research required"), the information still needed, and an **OOH Brief Builder** with copy and export |
 | Strategy | Builds a strategy: current situation, potential opportunities, items to investigate, potential channels and a 90-day plan |
 | Report | Internal opportunity report (11 sections). Copy Summary, Copy Full Report, Print (print CSS gives a clean A4 page and supports Save as PDF), and Export as Markdown |
-| Demo mode | Three fictional businesses (Demo Dental Co., Demo Fitness Studio, Demo Retail Brand), all labelled **DEMO DATA** |
 
 ## 3. Tech stack
 
@@ -89,7 +88,7 @@ This opens `http://localhost:5173/popup.html`, which shows the popup in a
 `chrome.*` APIs are not available, so:
 
 - storage falls back to `localStorage`
-- live tab analysis is turned off. Use **Demo mode** or the sample recent entries.
+- live tab analysis is turned off, so only the layout can be checked here.
 
 Use this for fast UI work with hot reload. To test **real page analysis**, build
 the extension and load it in Chrome (below).
@@ -169,8 +168,11 @@ outdoor-advertising question. To bring them back, set the flag to `true`, run
 
 Chrome extensions do not hot-reload the way a normal Vite site does.
 
-- **After any change:** run `npm run build` (or keep `npm run watch` running), then
-  click the **reload ↻** icon on the extension card in `chrome://extensions/`.
+- **Easiest:** keep `npm run watch` running. After each rebuild the extension
+  reloads itself and reopens any dashboard tabs (see `src/utils/devReload.ts`;
+  `npm run build` leaves this out). Load `dist/` unpacked once; no manual reload needed.
+- **Without watch:** run `npm run build`, then click the **reload ↻** icon on the
+  extension card in `chrome://extensions/`.
 - **Content script changes:** after reloading the extension, also **reload the web
   page** you are testing. A page that already has the old script injected keeps it
   until it reloads.
@@ -203,11 +205,11 @@ src/
 │   ├── tabService.ts             Active tab detection, eligibility, on-demand injection
 │   ├── analysisService.ts        PageExtraction → MarketingAnalysis (pipeline)
 │   ├── analysis/                 scoring, business detection, category rules, opportunities, service fit
-│   ├── seoService.ts  oohService.ts  competitorService.ts
+│   ├── seoService.ts  oohService.ts
 │   ├── reportService.ts  strategyService.ts  aiService.ts
 │   └── storageService.ts         Persistence abstraction
 ├── types/                        Strong contracts: page, analysis, ooh, misc
-├── data/                         Demo businesses, demo competitors, industries, OOH environments
+├── data/                         Industries, OOH environments
 ├── utils/                        Signal patterns, formatting, chrome helpers
 └── styles/                       tokens, base, components, popup, dashboard, print
 ```
@@ -226,7 +228,6 @@ Components never call `chrome.*` or touch fixtures directly. Every service expos
 | `analysisService` | `AnalysisProvider` | local deterministic engine |
 | `seoService` | `SeoProvider` | on-page checks |
 | `oohService` | `OOHDataProvider` | static environment reference (no inventory) |
-| `competitorService` | `CompetitorProvider` | demo data |
 | `aiService` | `InsightProvider` | template insight (`provider: 'template'`) |
 | `storageService` | `KeyValueStore` | `chrome.storage.local` / `localStorage` |
 
@@ -266,7 +267,7 @@ industry that usually has a physical presence.
 | `activeTab` | Gives temporary access to the current tab only after the user opens the extension, so the scanner can be injected without broad host permissions |
 | `scripting` | Injects `content.js` on demand when the user clicks Analyse |
 | `tabs` | Reads the active tab's URL and title to show "Current website" and to block internal pages |
-| `storage` | Saves recent analyses, settings, demo mode, the last analysis and OOH brief drafts locally |
+| `storage` | Saves recent analyses, settings, the last analysis and OOH brief drafts locally |
 | `host_permissions: https://web.archive.org/*` | Its history API doesn't send CORS headers. This is the only site-specific permission, and it's used only for "Online since" |
 
 There is no `content_scripts` entry that runs on every page.
@@ -339,5 +340,3 @@ The `scoringVersion` field already marks which rules produced each stored analys
 - The extension never sends email, WhatsApp or any other message. It is a research
   assistant only.
 - Extension pages use a strict CSP (`script-src 'self'`) and load no remote code.
-- Demo and competitor data are fictional and labelled. They use reserved `.example`
-  domains and fictional `5550` phone numbers.

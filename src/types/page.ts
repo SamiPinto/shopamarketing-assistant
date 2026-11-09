@@ -1,6 +1,6 @@
 /**
  * Raw, publicly visible information extracted from a web page by the content
- * script (or supplied by demo fixtures). This is the single input contract for
+ * script. This is the single input contract for
  * the analysis engine — a future backend crawler should produce the same shape.
  */
 
@@ -79,6 +79,9 @@ export type TechCategory =
   | 'css'
   | 'fonts'
   | 'marketing'
+  | 'booking'
+  | 'chat'
+  | 'payments'
   | 'cdn'
   | 'legacy'
 
@@ -172,10 +175,10 @@ export interface PageExtraction {
   wordCount: number
   /** Distinct question-style texts (FAQ items, accordions, headings). Missing on older analyses. */
   questionCount?: number
-  /** Signals for the AI-friendly check. Missing on older and demo analyses. */
+  /** Signals for the AI-friendly check. Missing on older analyses. */
   aiSignals?: AiSignals
   /** True when extraction hit the configured element limits. */
   truncated: boolean
   extractedAt: string
-  source: 'live' | 'demo'
+  source: 'live'
 }

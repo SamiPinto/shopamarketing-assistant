@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { getDemoBusiness } from '../data/demoBusinesses'
 import { analysisService } from '../services/analysisService'
 import { storageService } from '../services/storageService'
 import { AnalysisError, normaliseInputUrl, tabService, type ActiveTabInfo, type AnalysisErrorCode } from '../services/tabService'
@@ -140,15 +139,6 @@ export function AnalysisProvider({ children, loadLast = false }: { children: Rea
     [runPipeline],
   )
 
-  const analyseDemo = useCallback(
-    (demoId: string) =>
-      runPipeline(async () => {
-        const demo = getDemoBusiness(demoId)
-        if (!demo) throw new AnalysisError('failed', 'Demo business not found.')
-        return { ...demo.page, extractedAt: new Date().toISOString() }
-      }),
-    [runPipeline],
-  )
 
   const selectAnalysis = useCallback(
     (id: string) => {
@@ -181,11 +171,10 @@ export function AnalysisProvider({ children, loadLast = false }: { children: Rea
       resetRun,
       analyseActiveTab,
       analyseUrl,
-      analyseDemo,
       selectAnalysis,
       removeAnalysis,
     }),
-    [ready, settings, updateSettings, recent, current, activeTab, run, resetRun, analyseActiveTab, analyseUrl, analyseDemo, selectAnalysis, removeAnalysis],
+    [ready, settings, updateSettings, recent, current, activeTab, run, resetRun, analyseActiveTab, analyseUrl, selectAnalysis, removeAnalysis],
   )
 
   return <AnalysisContext.Provider value={value}>{children}</AnalysisContext.Provider>

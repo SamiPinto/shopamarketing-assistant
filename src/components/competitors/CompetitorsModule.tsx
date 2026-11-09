@@ -2,12 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { ExternalLink, MapPin, Search, Users } from 'lucide-react'
 import { useCompetitorLinks } from '../../hooks/useCompetitorLinks'
 import type { ModuleProps } from '../../pages/dashboardRoutes'
-import { competitorService } from '../../services/competitorService'
 import { websiteIntelService } from '../../services/websiteIntelService'
 import type { IndustryId, MarketingAnalysis } from '../../types/analysis'
 import type { WebsiteIntel } from '../../types/intel'
-import type { CompetitorResult } from '../../types/misc'
-import { DemoBadge, EmptyState, Notice } from '../ui/Primitives'
+import { EmptyState } from '../ui/Primitives'
 
 const SEARCH_TERM: Record<IndustryId, string> = {
   dental: 'dentist',
@@ -55,14 +53,13 @@ const ROWS: Row[] = [
 export default function CompetitorsModule({ analysis }: ModuleProps) {
   const { candidates, linked, ids, toggle } = useCompetitorLinks(analysis)
   const [intelMap, setIntelMap] = useState<Record<string, WebsiteIntel | null>>({})
-  const [demo, setDemo] = useState<CompetitorResult | null>(null)
   const query = searchQuery(analysis)
   const compared = useMemo(() => [analysis, ...linked], [analysis, linked])
 
   // Cached intel only — no new network lookups for competitor rows.
   useEffect(() => {
     let cancelled = false
-    void Promise.all(compared.map(async (a) => [a.id, a.source === 'demo' ? null : await websiteIntelService.cached(a.business.domain)] as const)).then(
+    void Promise.all(compared.map(async (a) => [a.id, await websiteIntelService.cached(a.business.domain)] as const)).then(
       (entries) => !cancelled && setIntelMap(Object.fromEntries(entries)),
     )
     return () => {
@@ -70,14 +67,6 @@ export default function CompetitorsModule({ analysis }: ModuleProps) {
     }
   }, [compared])
 
-  useEffect(() => {
-    if (analysis.source !== 'demo') return
-    let cancelled = false
-    void competitorService.getCompetitors(analysis).then((r) => !cancelled && setDemo(r))
-    return () => {
-      cancelled = true
-    }
-  }, [analysis])
 
   return (
     <div className="module">
@@ -128,7 +117,6 @@ export default function CompetitorsModule({ analysis }: ModuleProps) {
                   <span>
                     {c.business.name} <span className="muted-text mono">{c.business.domain}</span>
                   </span>
-                  {c.source === 'demo' && <DemoBadge label="Demo" />}
                 </label>
               </li>
             ))}
@@ -178,11 +166,6 @@ export default function CompetitorsModule({ analysis }: ModuleProps) {
         </section>
       )}
 
-      {demo && (
-        <Notice tone="attention" title="Demo competitor data">
-          {demo.disclaimer} Example layout: {demo.competitors.map((c) => c.name).join(', ')}.
-        </Notice>
-      )}
     </div>
   )
 }

@@ -231,24 +231,8 @@ async function runPageSpeed(url: string, apiKey: string): Promise<PageSpeedIntel
   }
 }
 
-/** Clearly-labelled placeholder intel for fictional demo businesses. */
-function demoIntel(analysis: MarketingAnalysis): WebsiteIntel {
-  const sinceYear = { 'demo-dental.example': 2014, 'demo-fitness.example': 2019, 'demo-retail.example': 2017 }[analysis.business.domain] ?? 2018
-  const domain = analysis.business.domain
-  return {
-    domain,
-    fetchedAt: new Date().toISOString(),
-    isDemo: true,
-    domainInfo: { status: 'ok', registrableDomain: domain, registrar: 'Example Registrar (demo)', registeredOn: `${sinceYear}-03-02T00:00:00Z`, lastChanged: null, expiresOn: null, note: null },
-    hosting: { status: 'ok', ip: null, ipOwner: null, hostingProvider: analysis.website.platform?.startsWith('Wix') ? 'Wix (platform-hosted)' : analysis.website.platform?.startsWith('Shopify') ? 'Shopify (platform-hosted)' : 'Example Shared Hosting (demo)', cdn: null, nameservers: [], dnsProvider: 'Example DNS (demo)', emailProvider: 'Google Workspace (demo)' },
-    archive: { status: 'ok', firstSeen: `${sinceYear}-05-11`, lastCaptured: null, historyUrl: '' },
-    pageSpeed: null,
-  }
-}
-
 export const websiteIntelService = {
   async get(analysis: MarketingAnalysis, options: { force?: boolean } = {}): Promise<WebsiteIntel> {
-    if (analysis.source === 'demo') return demoIntel(analysis)
     const host = new URL(analysis.page.url).hostname
     const domain = registrableDomain(host)
     const cached = await storageService.getIntel(domain)
@@ -262,7 +246,7 @@ export const websiteIntelService = {
       lookupHosting(host, domain, analysis.website.platform),
       lookupArchive(domain),
     ])
-    const intel: WebsiteIntel = { domain, fetchedAt: new Date().toISOString(), isDemo: false, domainInfo, hosting, archive, pageSpeed: cached?.pageSpeed ?? null }
+    const intel: WebsiteIntel = { domain, fetchedAt: new Date().toISOString(), domainInfo, hosting, archive, pageSpeed: cached?.pageSpeed ?? null }
     await storageService.saveIntel(intel)
     return intel
   },
@@ -270,7 +254,7 @@ export const websiteIntelService = {
   async runPageSpeed(analysis: MarketingAnalysis, intel: WebsiteIntel, apiKey: string): Promise<WebsiteIntel> {
     const pageSpeed = await runPageSpeed(analysis.page.url, apiKey)
     const next = { ...intel, pageSpeed }
-    if (!intel.isDemo) await storageService.saveIntel(next)
+    await storageService.saveIntel(next)
     return next
   },
 

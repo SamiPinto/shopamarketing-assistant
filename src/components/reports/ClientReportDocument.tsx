@@ -22,7 +22,6 @@ export function ClientReportDocument({ report }: { report: ClientReport }) {
         </div>
       </header>
 
-      {report.isDemo && <p className="report-document__demo">DEMO DATA — fictional business for demonstration only.</p>}
 
       <section className="client-report__hero">
         <p className="client-report__for">Prepared for</p>

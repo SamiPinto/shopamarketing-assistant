@@ -4,6 +4,9 @@
  * from the popup using the activeTab grant, so no host permissions are needed.
  */
 import { DEFAULT_SETTINGS, type OpenDashboardRequest } from '../types/misc'
+import { startBackgroundDevReload } from '../utils/devReload'
+
+startBackgroundDevReload()
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason !== 'install') return

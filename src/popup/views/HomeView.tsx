@@ -1,10 +1,7 @@
-import { useState } from 'react'
 import { ArrowRight, Ban, FileText, Globe, LayoutDashboard, ScanSearch } from 'lucide-react'
-import { DEMO_BUSINESSES } from '../../data/demoBusinesses'
 import { useAnalysis } from '../../hooks/analysisContextValue'
 import { useOpenDashboard } from '../../hooks/useOpenDashboard'
 import { Button } from '../../components/ui/Button'
-import { DemoBadge } from '../../components/ui/Primitives'
 import { truncate } from '../../utils/format'
 import { RecentList } from './RecentList'
 
@@ -13,24 +10,19 @@ interface Props {
 }
 
 export function HomeView({ onAnalysed }: Props) {
-  const { settings, activeTab, analyseActiveTab, analyseDemo, ready } = useAnalysis()
+  const { activeTab, analyseActiveTab, ready } = useAnalysis()
   const openDashboard = useOpenDashboard()
-  const [demoId, setDemoId] = useState(DEMO_BUSINESSES[0].id)
 
   const canAnalyseTab = activeTab?.eligibility.ok ?? false
-  const blocked = !settings.demoMode && ready && !canAnalyseTab
-
-  function runAnalysis() {
-    return settings.demoMode ? analyseDemo(demoId) : analyseActiveTab()
-  }
+  const blocked = ready && !canAnalyseTab
 
   // One click: analyse the page, then open the client report in the dashboard.
   async function handleGenerateReport() {
-    if (await runAnalysis()) await openDashboard('client')
+    if (await analyseActiveTab()) await openDashboard('client')
   }
 
   async function handleQuickAnalysis() {
-    if (await runAnalysis()) onAnalysed()
+    if (await analyseActiveTab()) onAnalysed()
   }
 
   return (
@@ -43,27 +35,6 @@ export function HomeView({ onAnalysed }: Props) {
         </h1>
       </section>
 
-      {settings.demoMode ? (
-        <section className="target target--demo" aria-labelledby="demo-heading">
-          <div className="target__label-row">
-            <p id="demo-heading" className="eyebrow">
-              Demo business
-            </p>
-            <DemoBadge />
-          </div>
-          <div className="demo-picker" role="radiogroup" aria-labelledby="demo-heading">
-            {DEMO_BUSINESSES.map((b) => (
-              <label key={b.id} className={`demo-option${demoId === b.id ? ' demo-option--selected' : ''}`}>
-                <input type="radio" name="demo" value={b.id} checked={demoId === b.id} onChange={() => setDemoId(b.id)} />
-                <span className="demo-option__name">{b.name}</span>
-                <span className="demo-option__meta">
-                  {b.description} · {b.city}
-                </span>
-              </label>
-            ))}
-          </div>
-        </section>
-      ) : (
         <section className="target" aria-labelledby="target-heading">
           <p id="target-heading" className="eyebrow">
             Current website
@@ -96,12 +67,11 @@ export function HomeView({ onAnalysed }: Props) {
             <>
               <p className="target__title">No website detected</p>
               <p className="target__hint">
-                Open a business website in this window, or switch on Demo mode to explore with fictional businesses.
+                Open a business website in this window to analyse it.
               </p>
             </>
           )}
         </section>
-      )}
 
       <div className="home__actions">
         <Button

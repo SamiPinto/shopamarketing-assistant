@@ -144,7 +144,7 @@ export interface WebsiteProfile {
 export interface MarketingAnalysis {
   id: string
   analysedAt: string
-  source: 'live' | 'demo'
+  source: 'live'
   scoringVersion: string
   business: BusinessProfile
   page: PageExtraction

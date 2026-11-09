@@ -59,11 +59,9 @@ export default function WebsiteModule({ analysis }: ModuleProps) {
                 {psi.message}
               </Notice>
             )}
-            {analysis.source !== 'demo' && (
-              <Button size="sm" icon={Gauge} disabled={!intel || pageSpeedRunning} onClick={intelState.runPageSpeed}>
-                {pageSpeedRunning ? 'Running Google test (up to 60s)…' : psi?.status === 'ok' ? 'Re-run Google PageSpeed' : 'Run Google PageSpeed test'}
-              </Button>
-            )}
+            <Button size="sm" icon={Gauge} disabled={!intel || pageSpeedRunning} onClick={intelState.runPageSpeed}>
+              {pageSpeedRunning ? 'Running Google test (up to 60s)…' : psi?.status === 'ok' ? 'Re-run Google PageSpeed' : 'Run Google PageSpeed test'}
+            </Button>
           </section>
 
           <section className="panel" aria-labelledby="og-preview">
@@ -102,13 +100,12 @@ export default function WebsiteModule({ analysis }: ModuleProps) {
             Website profile
           </h2>
           <div className="panel__actions">
-            {intel?.isDemo && <span className="panel__note">Domain & hosting are demo values</span>}
             {intel?.archive.historyUrl && (
               <a className="link panel__note" href={intel.archive.historyUrl} target="_blank" rel="noreferrer noopener">
                 Archive history <ExternalLink size={11} aria-hidden="true" />
               </a>
             )}
-            {!disabled && !intel?.isDemo && (
+            {!disabled && (
               <Button size="sm" variant="ghost" icon={RefreshCw} disabled={loading} onClick={intelState.refresh}>
                 Refresh
               </Button>

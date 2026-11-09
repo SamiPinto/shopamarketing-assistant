@@ -494,7 +494,7 @@ function comparisonRow(a: MarketingAnalysis, isSubject: boolean): ComparisonRow 
     name: a.business.name,
     domain: a.business.domain,
     isSubject,
-    platform: w.platform ?? 'Not identified',
+    platform: w.platform ?? 'Custom-coded',
     speed: w.speed.lcpMs !== null ? `${(w.speed.lcpMs / 1000).toFixed(1)}s (${w.speed.label.split(' — ')[0].toLowerCase()})` : w.speed.label.split(' — ')[0],
     mobile: w.responsive.label,
     design: `${{ modern: 'Modern', dated: 'Dated', outdated: 'Outdated' }[w.design.rating]} (${w.design.score})`,
@@ -534,7 +534,6 @@ export function buildClientReport(
     date: formatDate(a.analysedAt),
     preparedBy: settings.preparedBy.trim() || null,
     contactLine: settings.contactLine.trim() || null,
-    isDemo: a.source === 'demo',
     intro: evidenced
       ? `We reviewed the homepage of ${a.business.domain} and found ${plural(evidenced, 'practical improvement')} that could help it attract and convert more customers.`
       : `We reviewed the homepage of ${a.business.domain}. The basics are in good shape, so we’ve focused on growth ideas worth discussing.`,
@@ -558,7 +557,6 @@ export function buildClientReport(
 export function clientReportToText(r: ClientReport): string {
   return [
     'SHOPA MARKETING — WEBSITE OPPORTUNITY SNAPSHOT',
-    ...(r.isDemo ? ['[DEMO DATA — fictional business]'] : []),
     `Prepared for: ${r.business} (${r.website})`,
     `Date: ${r.date}${r.preparedBy ? ` · Prepared by: ${r.preparedBy}` : ''}`,
     '',

@@ -30,7 +30,6 @@ export interface AnalysisContextValue {
   analyseActiveTab(): Promise<MarketingAnalysis | null>
   /** Must be called directly from a user gesture (it may prompt for site access). */
   analyseUrl(input: string): Promise<MarketingAnalysis | null>
-  analyseDemo(demoId: string): Promise<MarketingAnalysis | null>
   selectAnalysis(id: string): void
   removeAnalysis(id: string): Promise<void>
 }

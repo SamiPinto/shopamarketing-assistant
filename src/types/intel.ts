@@ -52,7 +52,6 @@ export interface PageSpeedIntel {
 export interface WebsiteIntel {
   domain: string
   fetchedAt: string
-  isDemo: boolean
   domainInfo: DomainIntel
   hosting: HostingIntel
   archive: ArchiveIntel

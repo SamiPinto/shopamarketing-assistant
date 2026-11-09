@@ -78,9 +78,10 @@ export const storageService = {
   },
 
   async getRecentAnalyses(): Promise<MarketingAnalysis[]> {
-    // Analyses produced by older scoring rules lack newer fields; drop them.
+    // Analyses produced by older scoring rules lack newer fields, and demo
+    // analyses from earlier versions are fictional; drop both.
     const all = (await store.get<MarketingAnalysis[]>(KEYS.recent)) ?? []
-    return all.filter((a) => a.scoringVersion === SCORING_VERSION)
+    return all.filter((a) => a.scoringVersion === SCORING_VERSION && (a.source as string) !== 'demo')
   },
 
   /** Saves an analysis as the most recent, replacing older runs of the same URL. */

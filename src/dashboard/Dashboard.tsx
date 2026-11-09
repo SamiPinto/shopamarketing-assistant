@@ -1,6 +1,5 @@
 import { Suspense, useEffect, useRef } from 'react'
-import { MousePointerClick, ScanSearch } from 'lucide-react'
-import { DEMO_BUSINESSES } from '../data/demoBusinesses'
+import { ScanSearch } from 'lucide-react'
 import { AnalysisProvider } from '../hooks/AnalysisContext'
 import { useAnalysis } from '../hooks/analysisContextValue'
 import { useHashRoute } from '../hooks/useHashRoute'
@@ -9,7 +8,6 @@ import { ModuleErrorBoundary } from '../components/layout/ModuleErrorBoundary'
 import { Sidebar } from '../components/layout/Sidebar'
 import { Topbar } from '../components/layout/Topbar'
 import { UrlAnalyseForm } from '../components/layout/UrlAnalyseForm'
-import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/Primitives'
 
 function ModuleFallback() {
@@ -22,7 +20,6 @@ function ModuleFallback() {
 }
 
 function NoAnalysis() {
-  const { analyseDemo, run } = useAnalysis()
   return (
     <div className="dashboard-empty">
       <EmptyState icon={ScanSearch} title="No analysis yet">
@@ -30,16 +27,8 @@ function NoAnalysis() {
       </EmptyState>
       <UrlAnalyseForm variant="hero" />
       <p className="dashboard-empty__hint muted-text">
-        You can also click <strong>Analyse Website</strong> in the toolbar popup while on a site, or explore with a
-        fictional demo business:
+        You can also open a business website, click the Shopa icon and choose <strong>Generate Report</strong>.
       </p>
-      <div className="dashboard-empty__demos">
-        {DEMO_BUSINESSES.map((b) => (
-          <Button key={b.id} icon={MousePointerClick} disabled={run.phase === 'running'} onClick={() => void analyseDemo(b.id)}>
-            {b.name}
-          </Button>
-        ))}
-      </div>
     </div>
   )
 }

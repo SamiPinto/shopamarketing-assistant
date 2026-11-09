@@ -19,6 +19,19 @@ const PLATFORM_PRIORITY = [
   'GoDaddy Website Builder',
   'Duda',
   'Weebly',
+  'Tilda',
+  'Jimdo',
+  'Strikingly',
+  'Carrd',
+  'Hostinger Website Builder',
+  'Site123',
+  'Webnode',
+  'Square Online',
+  'Ecwid',
+  'Neto (Maropost)',
+  'Salesforce Commerce Cloud',
+  'PrestaShop',
+  'OpenCart',
   'BigCommerce',
   'Magento',
   'WordPress',
@@ -26,12 +39,25 @@ const PLATFORM_PRIORITY = [
   'Drupal',
   'Ghost',
   'HubSpot CMS',
+  'Blogger',
+  'Umbraco',
+  'Craft CMS',
+  'TYPO3',
+  'Concrete CMS',
+  'Sitecore',
+  'Adobe Experience Manager',
   'Next.js',
   'Nuxt',
   'Gatsby',
   'Angular',
   'Vue',
+  'Astro',
+  'SvelteKit',
+  'Remix',
   'Svelte',
+  'Qwik',
+  'Ember',
+  'React',
 ]
 
 function techLabel(t: TechItem): string {
@@ -41,7 +67,7 @@ function techLabel(t: TechItem): string {
 function platformOf(stack: TechItem[]): string | null {
   const primary = PLATFORM_PRIORITY.map((name) => stack.find((t) => t.name === name)).find(Boolean)
   if (!primary) return null
-  const addOns = stack.filter((t) => ['Elementor', 'Divi', 'WooCommerce'].includes(t.name)).map((t) => t.name)
+  const addOns = stack.filter((t) => ['Elementor', 'Divi', 'Beaver Builder', 'WPBakery', 'Avada', 'Bricks', 'Oxygen', 'WooCommerce'].includes(t.name)).map((t) => t.name)
   return addOns.length ? `${techLabel(primary)} + ${addOns.join(' + ')}` : techLabel(primary)
 }
 

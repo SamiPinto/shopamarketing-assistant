@@ -50,8 +50,4 @@
     break-inside: avoid;
   }
 
-  .report-document__demo {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw, Sparkles } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { AnalysisProvider } from '../hooks/AnalysisContext'
 import { SCAN_STEPS, useAnalysis } from '../hooks/analysisContextValue'
 import { AnalysisErrorView } from '../components/ui/AnalysisErrorView'
@@ -13,13 +13,13 @@ import { ResultsView } from './views/ResultsView'
 type View = 'home' | 'results' | 'opportunities'
 
 function PopupBody() {
-  const { run, current, activeTab, settings, resetRun, analyseActiveTab, updateSettings } = useAnalysis()
+  const { run, current, activeTab, resetRun, analyseActiveTab } = useAnalysis()
   const [view, setView] = useState<View>('home')
 
   if (run.phase === 'running') {
     return (
       <div className="popup-view popup-view--center">
-        <ScanProgress steps={SCAN_STEPS} current={run.step} domain={settings.demoMode ? undefined : activeTab?.domain} />
+        <ScanProgress steps={SCAN_STEPS} current={run.step} domain={activeTab?.domain} />
       </div>
     )
   }
@@ -38,15 +38,6 @@ function PopupBody() {
                   Try again
                 </Button>
               )}
-              <Button
-                icon={Sparkles}
-                onClick={() => {
-                  resetRun()
-                  void updateSettings({ demoMode: true })
-                }}
-              >
-                Use Demo Mode
-              </Button>
               <Button variant="ghost" onClick={resetRun}>
                 Back
               </Button>

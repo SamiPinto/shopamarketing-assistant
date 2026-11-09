@@ -6,7 +6,7 @@ const COPY: Record<AnalysisErrorCode, { icon: LucideIcon; title: string; body: s
   'not-extension': {
     icon: PlugZap,
     title: 'Live analysis runs inside the extension',
-    body: 'You are viewing the interface in development preview. Load the built dist/ folder in Chrome to analyse real pages, or use Demo Mode.',
+    body: 'You are viewing the interface in development preview. Load the built dist/ folder in Chrome to analyse real pages.',
   },
   'no-tab': {
     icon: CircleAlert,

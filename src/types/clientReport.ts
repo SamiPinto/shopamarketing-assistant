@@ -40,7 +40,6 @@ export interface ClientReport {
   date: string
   preparedBy: string | null
   contactLine: string | null
-  isDemo: boolean
   intro: string
   /** Two-line sales pitch: diagnosis, then the offer. */
   pitch: [string, string]

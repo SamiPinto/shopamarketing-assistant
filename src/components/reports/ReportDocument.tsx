@@ -9,9 +9,6 @@ export function ReportDocument({ report }: { report: OpportunityReport }) {
         <span className="report-document__classification">Internal research</span>
       </header>
 
-      {report.isDemo && (
-        <p className="report-document__demo">DEMO DATA — fictional business for demonstration only.</p>
-      )}
 
       <h1 className="report-document__title">{report.title}</h1>
       <dl className="report-document__meta">

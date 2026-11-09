@@ -138,18 +138,6 @@ body.surface-dashboard {
   min-width: 0;
 }
 
-.topbar__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-right: 2px;
-  font-size: var(--text-2xs);
-  font-weight: 650;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
 .dashboard__main {
   flex: 1;
   padding: 32px 32px 64px;
@@ -182,14 +170,6 @@ body.surface-dashboard {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-}
-
-.dashboard-empty__demos {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 16px 20px;
 }
 
 /* ----- Module layout ----- */
@@ -893,18 +873,6 @@ body.surface-dashboard {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
-}
-
-.report-document__demo {
-  margin-top: 16px;
-  padding: 8px 12px;
-  border: 1px dashed var(--accent);
-  border-radius: 6px;
-  background: var(--accent-wash);
-  color: var(--accent-strong);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
 }
 
 .report-document__title {

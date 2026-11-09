@@ -1,5 +1,5 @@
 import { EXTRACT_MESSAGE, type ContentRequest, type ContentResponse } from '../types/misc'
-import type { PageExtraction } from '../types/page'
+import type { PageExtraction, TechItem } from '../types/page'
 import { checkEligibility, isExtensionContext, type PageEligibility } from '../utils/chrome'
 
 export type AnalysisErrorCode =
@@ -34,6 +34,34 @@ const PAGE_LOAD_TIMEOUT_MS = 30_000
 // Gives client-rendered sites a moment to paint after the load event.
 const RENDER_SETTLE_MS = 1500
 const CONTENT_SCRIPT_FILE = 'content.js'
+
+/**
+ * Runs in the page's own JavaScript world, which the content script can't see.
+ * React leaves its internal keys on the elements it renders, so look for those.
+ * Self-contained because Chrome serialises it into the page.
+ */
+function probeReact(): string | boolean {
+  const version = (window as unknown as { React?: { version?: unknown } }).React?.version
+  if (typeof version === 'string') return version
+  const elements = [document.body, ...Array.from(document.querySelectorAll('body *')).slice(0, 300)]
+  return elements.some((el) =>
+    Object.keys(el).some((k) => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$') || k === '_reactRootContainer'),
+  )
+}
+
+/** Adds React to the tech stack when the page uses it. Never fails the scan. */
+async function withReact(tabId: number, data: PageExtraction): Promise<PageExtraction> {
+  if (data.tech.some((t) => t.name === 'React')) return data
+  try {
+    const [injection] = await chrome.scripting.executeScript({ target: { tabId }, world: 'MAIN', func: probeReact })
+    const found = injection?.result
+    if (!found) return data
+    const react: TechItem = { name: 'React', category: 'framework', version: typeof found === 'string' ? found : null, outdated: false }
+    return { ...data, tech: [...data.tech, react] }
+  } catch {
+    return data
+  }
+}
 
 export const tabService = {
   async getActiveTab(): Promise<ActiveTabInfo | null> {
@@ -86,7 +114,7 @@ export const tabService = {
 
     if (!response) throw new AnalysisError('no-content-script', 'The page scanner returned no data.')
     if (!response.ok) throw new AnalysisError('failed', response.error)
-    return response.data
+    return withReact(tab.tabId, response.data)
   },
 
   /**

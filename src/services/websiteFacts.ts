@@ -28,13 +28,22 @@ export function buildWebsiteFacts(a: MarketingAnalysis, intel: WebsiteIntel | nu
   const w = a.website
   const pending = (label: string, id: WebsiteFact['id']): WebsiteFact => ({ id, label, value: 'Checking…', detail: null, tone: 'pending' })
   const others = w.techStack.filter((t) => !w.platform?.includes(t.name) && t.category !== 'fonts').map((t) => (t.version ? `${t.name} ${t.version}` : t.name))
+  // Without a platform, headline what the site is built with, not add-ons such as booking or chat widgets.
+  const builtWith = w.techStack.filter((t) => ['framework', 'css', 'library'].includes(t.category)).map((t) => t.name)
 
   const facts: WebsiteFact[] = [
     {
       id: 'platform',
       label: 'Technology',
-      value: w.platform ?? (w.techStack[0]?.name ? w.techStack.map((t) => t.name).slice(0, 2).join(', ') : 'Not identified'),
-      detail: w.outdatedTech.length ? `Outdated: ${w.outdatedTech.join(', ')}` : others.length ? others.slice(0, 4).join(', ') : null,
+      // No builder, CMS or framework fingerprint means the site was most likely hand-coded.
+      value: w.platform ?? (builtWith.length ? builtWith.slice(0, 2).join(', ') : 'Custom-coded'),
+      detail: w.outdatedTech.length
+        ? `Outdated: ${w.outdatedTech.join(', ')}`
+        : others.length
+          ? others.slice(0, 4).join(', ')
+          : w.platform || builtWith.length
+            ? null
+            : 'No website builder, CMS or framework found',
       tone: w.outdatedTech.length ? 'attention' : 'neutral',
     },
   ]

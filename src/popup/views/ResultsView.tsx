@@ -6,7 +6,6 @@ import { countSignals } from '../../services/analysis/opportunities'
 import { reportService } from '../../services/reportService'
 import type { MarketingAnalysis } from '../../types/analysis'
 import { Button } from '../../components/ui/Button'
-import { DemoBadge } from '../../components/ui/Primitives'
 import { CategoryStatusList } from '../../components/overview/CategoryStatusList'
 
 interface Props {
@@ -34,7 +33,6 @@ export function ResultsView({ analysis, onBack, onViewOpportunities }: Props) {
         >
           <ArrowLeft size={14} aria-hidden="true" /> New analysis
         </button>
-        {analysis.source === 'demo' && <DemoBadge />}
       </div>
 
       <section className="results__hero">

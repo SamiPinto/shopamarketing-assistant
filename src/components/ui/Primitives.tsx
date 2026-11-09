@@ -1,14 +1,6 @@
 import type { ReactNode } from 'react'
 import { Info, type LucideIcon } from 'lucide-react'
 
-export function DemoBadge({ label = 'Demo data' }: { label?: string }) {
-  return (
-    <span className="demo-badge" title="Fictional data for demonstration only">
-      {label}
-    </span>
-  )
-}
-
 export function Eyebrow({ children }: { children: ReactNode }) {
   return <p className="eyebrow">{children}</p>
 }

@@ -214,54 +214,10 @@ body.dev-preview #root {
   justify-content: space-between;
 }
 
-.demo-picker {
-  display: grid;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.demo-option {
-  position: relative;
-  display: grid;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
-}
-
-.demo-option input {
-  position: absolute;
-  opacity: 0;
-}
-
 .home__hint {
   font-size: var(--text-xs);
   color: var(--faint);
   text-align: center;
-}
-
-.demo-option:hover {
-  border-color: var(--line-strong);
-}
-
-.demo-option--selected {
-  border-color: var(--accent);
-  background: var(--accent-wash);
-}
-
-.demo-option:has(input:focus-visible) {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.demo-option__name {
-  font-weight: 650;
-}
-
-.demo-option__meta {
-  font-size: var(--text-xs);
-  color: var(--muted);
 }
 
 .home__actions {
@@ -275,11 +231,6 @@ body.dev-preview #root {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
-}
-
-.recent__note {
-  font-size: var(--text-2xs);
-  color: var(--faint);
 }
 
 .recent__list {

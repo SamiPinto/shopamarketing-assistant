@@ -1,28 +1,6 @@
 import type { ServiceId } from './analysis'
 import type { PageExtraction } from './page'
 
-/* ---------- Competitors ---------- */
-
-export type PresenceLevel = 'strong' | 'moderate' | 'limited' | 'unknown'
-
-export interface Competitor {
-  id: string
-  name: string
-  website: string
-  digitalPresence: PresenceLevel
-  socialPresence: PresenceLevel
-  oohActivity: 'observed' | 'not-observed' | 'unknown'
-  notes: string
-  potentialGap: string
-}
-
-export interface CompetitorResult {
-  /** "demo" data must always be labelled as such in the UI. */
-  source: 'demo' | 'provider'
-  competitors: Competitor[]
-  disclaimer: string
-}
-
 /* ---------- Strategy ---------- */
 
 export interface StrategyPhase {
@@ -55,14 +33,12 @@ export interface OpportunityReport {
   website: string
   analysisDate: string
   preparedBy: string | null
-  isDemo: boolean
   sections: ReportSection[]
 }
 
 /* ---------- Settings ---------- */
 
 export interface Settings {
-  demoMode: boolean
   /** Shown on generated reports. Stored locally only. */
   preparedBy: string
   /** Contact details printed on the client report, e.g. email · phone. */
@@ -74,7 +50,6 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  demoMode: false,
   preparedBy: '',
   contactLine: '',
   onlineLookups: true,

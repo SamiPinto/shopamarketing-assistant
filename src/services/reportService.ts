@@ -89,7 +89,6 @@ export function buildReport(analysis: MarketingAnalysis, preparedBy: string | nu
     website: business.url,
     analysisDate: formatDate(analysis.analysedAt),
     preparedBy: preparedBy?.trim() || null,
-    isDemo: analysis.source === 'demo',
     sections: sections.map((s) => (s.id === 'summary' ? { ...s, title: `Executive summary — ${signals} opportunity signals` } : s)),
   }
 }
@@ -98,7 +97,6 @@ export function reportToText(report: OpportunityReport): string {
   const header = [
     'SHOPA MARKETING',
     report.title,
-    ...(report.isDemo ? ['[DEMO DATA — fictional business for demonstration only]'] : []),
     '',
     `Business: ${report.business}`,
     `Website: ${report.website}`,
@@ -119,7 +117,6 @@ export function reportToText(report: OpportunityReport): string {
 export function reportToMarkdown(report: OpportunityReport): string {
   const lines = [
     `# Shopa Marketing — ${report.title}`,
-    report.isDemo ? '\n> **DEMO DATA** — fictional business for demonstration only.\n' : '',
     `**Business:** ${report.business}  `,
     `**Website:** ${report.website}  `,
     `**Analysis date:** ${report.analysisDate}  `,
@@ -138,7 +135,7 @@ export function reportToMarkdown(report: OpportunityReport): string {
 export function summaryToText(analysis: MarketingAnalysis): string {
   const { business, insight, services } = analysis
   return [
-    `${business.name} — ${business.domain}${analysis.source === 'demo' ? ' [DEMO DATA]' : ''}`,
+    `${business.name} — ${business.domain}`,
     insight.headline,
     '',
     ...insight.summary,

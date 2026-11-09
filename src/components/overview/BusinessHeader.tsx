@@ -1,7 +1,6 @@
 import { Building2, Clock, ExternalLink, MapPin } from 'lucide-react'
 import type { MarketingAnalysis } from '../../types/analysis'
 import { formatDateTime } from '../../utils/format'
-import { DemoBadge } from '../ui/Primitives'
 
 export function BusinessHeader({ analysis }: { analysis: MarketingAnalysis }) {
   const { business } = analysis
@@ -9,18 +8,13 @@ export function BusinessHeader({ analysis }: { analysis: MarketingAnalysis }) {
     <header className="business-header">
       <div className="business-header__title-row">
         <h1 className="business-header__name">{business.name}</h1>
-        {analysis.source === 'demo' && <DemoBadge />}
       </div>
       <ul className="business-header__facts">
         <li>
-          {analysis.source === 'demo' ? (
-            <span className="mono">{business.domain}</span>
-          ) : (
-            <a href={business.url} target="_blank" rel="noreferrer noopener" className="mono link">
-              {business.domain}
-              <ExternalLink size={12} aria-hidden="true" />
-            </a>
-          )}
+          <a href={business.url} target="_blank" rel="noreferrer noopener" className="mono link">
+            {business.domain}
+            <ExternalLink size={12} aria-hidden="true" />
+          </a>
         </li>
         <li title={business.industry?.basis}>
           <Building2 size={13} aria-hidden="true" />

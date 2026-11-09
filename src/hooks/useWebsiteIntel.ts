@@ -19,7 +19,7 @@ export function useWebsiteIntel(analysis: MarketingAnalysis): WebsiteIntelState 
   const [nonce, setNonce] = useState(0)
   const [result, setResult] = useState<{ key: string; intel: WebsiteIntel | null }>({ key: '', intel: null })
   const [pageSpeedRunning, setPageSpeedRunning] = useState(false)
-  const disabled = !settings.onlineLookups && analysis.source !== 'demo'
+  const disabled = !settings.onlineLookups
   const key = `${analysis.id}:${disabled}:${nonce}`
 
   useEffect(() => {

@@ -28,14 +28,10 @@ export default function SocialModule({ analysis }: ModuleProps) {
                 <div className="platform__body">
                   <p className="platform__name">{SOCIAL_LABELS[platform]}</p>
                   {link ? (
-                    analysis.source === 'demo' ? (
-                      <p className="platform__url mono">{link.url.replace(/^https?:\/\//, '')}</p>
-                    ) : (
-                      <a className="platform__url mono link" href={link.url} target="_blank" rel="noreferrer noopener">
-                        {link.url.replace(/^https?:\/\/(www\.)?/, '')}
-                        <ExternalLink size={11} aria-hidden="true" />
-                      </a>
-                    )
+                    <a className="platform__url mono link" href={link.url} target="_blank" rel="noreferrer noopener">
+                      {link.url.replace(/^https?:\/\/(www\.)?/, '')}
+                      <ExternalLink size={11} aria-hidden="true" />
+                    </a>
                   ) : (
                     <p className="platform__url">Not detected on this page</p>
                   )}
