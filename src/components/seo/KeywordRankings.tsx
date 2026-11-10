@@ -125,27 +125,13 @@ export function KeywordRankings({ analysis }: { analysis: MarketingAnalysis }) {
           <Notice tone="attention">Online lookups are turned off in Settings. Turn them on to check Google rankings.</Notice>
         )}
 
-        {kw.paid ? (
+        {kw.paid && (
           <p className="panel__note">
             Using DataForSEO: results as Google shows them to someone in each location, with monthly search volumes.
             {balance !== null && ` Balance: ${money(balance)}.`}
           </p>
-        ) : (
-          <p className="panel__note">
-            Using the free method (a Google tab). Add a DataForSEO login to .env for true local results and search volumes.
-          </p>
         )}
-        <p className="muted-text">
-          Each service is searched in each suburb, city or pincode, the way local customers search (for example “blocked
-          drains 2150”). This shows where the site and its competitors rank in every area, on Google
-          {kw.market.code === 'WW' ? '' : ` in ${kw.market.name}`}.
-        </p>
-        {kw.country ? (
-          <p className="panel__note">
-            Country detected: {kw.country.name} (from {kw.country.basis.toLowerCase()}).
-            {kw.market.code !== kw.country.code && ` Searching ${kw.market.name} instead, as chosen below.`}
-          </p>
-        ) : (
+        {!kw.country && (
           <Notice tone="attention">
             The site doesn’t make its country clear (no matching address, phone format or domain), so searches use worldwide
             google.com. Pick the right country below for accurate local rankings.

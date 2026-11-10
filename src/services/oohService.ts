@@ -1,6 +1,6 @@
 import { OOH_ENVIRONMENTS, OOH_REQUIRED_INFORMATION } from '../data/oohEnvironments'
 import type { BusinessProfile, CategoryResult, MarketingAnalysis } from '../types/analysis'
-import type { OOHBrief, OOHBriefInput, OOHEnvironment, OOHEnvironmentId } from '../types/ooh'
+import type { OOHBrief, OOHBriefInput, OOHEnvironmentId } from '../types/ooh'
 import { formatDate } from '../utils/format'
 import { hasPhysicalFootprint } from './analysis/business'
 import { makeCheck } from './analysis/scoring'
@@ -8,18 +8,8 @@ import { makeCheck } from './analysis/scoring'
 /**
  * OOH is evaluated as its own discipline, not an upsell. From a website alone we
  * can only establish context (location, footprint); suitability always needs
- * campaign, audience and inventory data. A future provider can plug in real
- * inventory and audience data via this interface.
+ * campaign, audience and inventory data.
  */
-export interface OOHDataProvider {
-  getEnvironments(): Promise<OOHEnvironment[]>
-}
-
-const localProvider: OOHDataProvider = {
-  async getEnvironments() {
-    return OOH_ENVIRONMENTS
-  },
-}
 
 const WHY_RESEARCH = 'OOH suitability depends on campaign objectives, audience and available media — none of which can be read from a website.'
 
@@ -115,11 +105,7 @@ export function briefToText(brief: OOHBrief): string {
 }
 
 export const oohService = {
-  provider: localProvider,
   requiredInformation: OOH_REQUIRED_INFORMATION,
-  getEnvironments(): Promise<OOHEnvironment[]> {
-    return this.provider.getEnvironments()
-  },
   /** Environments worth discussing first, based only on detected context. */
   suggestEnvironments(business: BusinessProfile | null): OOHEnvironmentId[] {
     if (!business?.location) return []

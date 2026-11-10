@@ -178,7 +178,3 @@ export function marketByCode(code: string | null | undefined): Market | null {
 /** Fallback for sites whose country can't be told: Google without a country bias. */
 export const WORLDWIDE = { googleHost: 'www.google.com', gl: '', name: 'Worldwide' }
 
-/** Every Google host used for searches, for the optional host permission request. */
-export const GOOGLE_HOST_PATTERNS = [...new Set([...MARKETS.map((m) => m.googleHost), WORLDWIDE.googleHost])].map(
-  (host) => `https://${host}/*`,
-)

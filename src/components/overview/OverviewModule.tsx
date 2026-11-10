@@ -21,10 +21,13 @@ export default function OverviewModule({ analysis, navigate }: ModuleProps) {
 
       <section className="overview__hero">
         <div className="overview__figure">
-          <p className="eyebrow">Opportunity signals detected</p>
-          <p className="overview__number">{signals}</p>
+          <p className="overview__lede">
+            {signals === 0
+              ? 'No opportunity signals found on this page'
+              : `${signals} opportunity signal${signals === 1 ? '' : 's'} to talk about`}
+          </p>
           <p className="overview__figure-note">
-            Counted from rule-based checks on this page{research ? `, plus ${research} area${research === 1 ? '' : 's'} requiring research` : ''}.
+            Counted from rule-based checks on this page{research ? `, plus ${research} area${research === 1 ? '' : 's'} that need research` : ''}.
           </p>
           <div className="button-row">
             <Button variant="primary" icon={FileText} onClick={() => navigate('client')}>

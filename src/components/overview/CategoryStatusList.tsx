@@ -3,6 +3,7 @@ import { HIDDEN_SCREENS, VISIBLE_CATEGORIES } from '../../config/features'
 import type { CategoryId, MarketingAnalysis } from '../../types/analysis'
 import { plural } from '../../utils/format'
 import { StatusBadge } from '../ui/StatusBadge'
+import { CATEGORY_META } from '../ui/statusMeta'
 import { CATEGORY_ICONS, signalCount } from './categoryMeta'
 
 interface Props {
@@ -29,6 +30,16 @@ export function CategoryStatusList({ analysis, onSelect, showSummary = false, ca
             <span className="category-row__main">
               <span className="category-row__label">{category.label}</span>
               {showSummary && <span className="category-row__summary">{category.summary}</span>}
+              {showSummary && category.score !== null && (
+                <span className="category-row__score" aria-label={`Rule-based score ${category.score} out of 100`}>
+                  <span className={`category-row__bar category-row__bar--${CATEGORY_META[category.status].tone}`} aria-hidden="true">
+                    <span style={{ width: `${category.score}%` }} />
+                  </span>
+                  <span className="category-row__score-value" aria-hidden="true">
+                    {category.score}/100
+                  </span>
+                </span>
+              )}
             </span>
             <span className="category-row__meta">
               {count > 0 && <span className="category-row__count">{plural(count, 'signal')}</span>}

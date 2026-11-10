@@ -51,10 +51,8 @@
 }
 
 .client-report__for {
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: var(--text-xs);
+  font-weight: 600;
   color: var(--muted);
 }
 
@@ -221,10 +219,8 @@
 
 .improvement__grid dt {
   margin-bottom: 2px;
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--text-xs);
+  font-weight: 600;
   color: var(--muted);
 }
 
@@ -333,10 +329,8 @@
 }
 
 .talking__sub {
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: var(--text-xs);
+  font-weight: 600;
   color: var(--ink-3);
 }
 

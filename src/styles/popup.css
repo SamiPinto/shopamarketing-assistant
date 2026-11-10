@@ -109,19 +109,14 @@ body.dev-preview #root {
 
 /* ----- Home ----- */
 .home__headline {
+  max-width: 14ch;
   font-family: var(--font-display);
-  font-size: 27px;
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
-}
-
-.home__headline em {
-  font-style: normal;
-  background: var(--brand-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-stretch: var(--display-narrow);
+  font-size: 32px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .target {
@@ -208,11 +203,6 @@ body.dev-preview #root {
   100% { box-shadow: 0 0 0 0 rgba(31, 122, 85, 0); }
 }
 
-.target__label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
 .home__hint {
   font-size: var(--text-xs);

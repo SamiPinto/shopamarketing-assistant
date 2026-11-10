@@ -28,11 +28,7 @@ export function HomeView({ onAnalysed }: Props) {
   return (
     <div className="popup-view home">
       <section className="home__hero">
-        <h1 className="home__headline">
-          Marketing intelligence
-          <br />
-          <em>for every prospect.</em>
-        </h1>
+        <h1 className="home__headline">Find the pitch in any business website</h1>
       </section>
 
         <section className="target" aria-labelledby="target-heading">

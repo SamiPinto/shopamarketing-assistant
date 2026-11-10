@@ -1,31 +1,6 @@
 import type { ReactNode } from 'react'
 import { Info, type LucideIcon } from 'lucide-react'
 
-export function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="eyebrow">{children}</p>
-}
-
-interface SectionHeaderProps {
-  eyebrow?: string
-  title: string
-  description?: ReactNode
-  actions?: ReactNode
-  as?: 'h1' | 'h2' | 'h3'
-}
-
-export function SectionHeader({ eyebrow, title, description, actions, as: Heading = 'h2' }: SectionHeaderProps) {
-  return (
-    <header className="section-header">
-      <div className="section-header__text">
-        {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-        <Heading className="section-header__title">{title}</Heading>
-        {description && <p className="section-header__description">{description}</p>}
-      </div>
-      {actions && <div className="section-header__actions">{actions}</div>}
-    </header>
-  )
-}
-
 interface NoticeProps {
   tone?: 'info' | 'attention' | 'accent' | 'neutral'
   icon?: LucideIcon

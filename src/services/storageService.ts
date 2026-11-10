@@ -83,10 +83,9 @@ export const storageService = {
   },
 
   async getRecentAnalyses(): Promise<MarketingAnalysis[]> {
-    // Analyses produced by older scoring rules lack newer fields, and demo
-    // analyses from earlier versions are fictional; drop both.
+    // Analyses produced by older scoring rules lack newer fields; drop them.
     const all = (await store.get<MarketingAnalysis[]>(KEYS.recent)) ?? []
-    return all.filter((a) => a.scoringVersion === SCORING_VERSION && (a.source as string) !== 'demo')
+    return all.filter((a) => a.scoringVersion === SCORING_VERSION)
   },
 
   /** Saves an analysis as the most recent, replacing older runs of the same URL. */
@@ -105,11 +104,6 @@ export const storageService = {
     const next = (await this.getRecentAnalyses()).filter((a) => a.id !== id)
     await store.set(KEYS.recent, next)
     return next
-  },
-
-  async clearAnalyses(): Promise<void> {
-    await store.remove(KEYS.recent)
-    await store.remove(KEYS.lastId)
   },
 
   async getLastAnalysis(): Promise<MarketingAnalysis | null> {

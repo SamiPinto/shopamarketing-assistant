@@ -1,11 +1,3 @@
-export function displayDomain(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return url
-  }
-}
-
 const rtf = new Intl.RelativeTimeFormat('en-AU', { numeric: 'auto' })
 
 export function relativeTime(iso: string, now = Date.now()): string {
