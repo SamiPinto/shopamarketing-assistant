@@ -51,6 +51,8 @@ export interface SchemaSummary {
   region: string | null
   postcode: string | null
   streetAddress: string | null
+  /** addressCountry, e.g. "AU" or "United Kingdom". Missing on older analyses. */
+  country?: string | null
 }
 
 export interface OpenGraphSummary {
@@ -165,6 +167,8 @@ export interface PageExtraction {
   socialLinks: SocialLink[]
   /** Address-like text fragments found in footers, contact blocks or schema. */
   addressCandidates: string[]
+  /** Start of the footer's visible text, where addresses usually are. Missing on older analyses. */
+  footerText?: string
   schema: SchemaSummary
   openGraph: OpenGraphSummary
   tracking: TrackingSignals

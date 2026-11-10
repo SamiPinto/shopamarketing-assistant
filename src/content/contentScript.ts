@@ -9,11 +9,13 @@ import {
   AU_ADDRESS_PATTERN,
   AU_PHONE_PATTERN,
   EMAIL_PATTERN,
+  INTL_PHONE_PATTERN,
   classifyCta,
   classifySocialUrl,
   blockedAiCrawlers,
   normaliseWhitespace,
 } from '../utils/signals'
+import { MARKETS } from '../data/markets'
 import { EXTRACT_MESSAGE } from '../types/misc'
 import { designSignals, detectTech, freshnessSignals, measurePerformance } from './detectors'
 import type { ContentRequest, ContentResponse } from '../types/misc'
@@ -34,7 +36,8 @@ const LIMITS = {
   ctaCandidates: 400,
   ctas: 20,
   contacts: 5,
-  addresses: 3,
+  addresses: 5,
+  footerChars: 600,
   textChars: 150_000,
   inlineScripts: 60,
   inlineScriptChars: 20_000,
@@ -160,7 +163,7 @@ function contacts(anchors: HTMLAnchorElement[], bodyText: string): { phones: str
   const mailLinks = anchors
     .filter((a) => a.protocol === 'mailto:')
     .map((a) => decodeURIComponent(a.href.replace(/^mailto:/, '').split('?')[0]))
-  const textPhones = bodyText.match(AU_PHONE_PATTERN) ?? []
+  const textPhones = [...(bodyText.match(INTL_PHONE_PATTERN) ?? []), ...(bodyText.match(AU_PHONE_PATTERN) ?? [])]
   const textEmails = (bodyText.match(EMAIL_PATTERN) ?? []).filter(
     (e) => !/\.(png|jpe?g|gif|webp|svg)$/i.test(e),
   )
@@ -237,11 +240,19 @@ function schema(): { summary: SchemaSummary; dateModified: string | null } {
     region: asString(addr?.addressRegion),
     postcode: asString(addr?.postalCode),
     streetAddress: asString(addr?.streetAddress),
+    // addressCountry is either text ("AU") or a Country object with a name.
+    country: asString(addr?.addressCountry) ?? asString((addr?.addressCountry as JsonObject | undefined)?.name),
     },
   }
 }
 
-function addressCandidates(bodyText: string): string[] {
+/** Visible text at the start of the footer, where most sites put their address. */
+function footerText(): string {
+  const footer = document.querySelector('footer, [role="contentinfo"], #footer, .footer, [class*="footer" i]')
+  return footer instanceof HTMLElement ? normaliseWhitespace(footer.innerText).slice(0, LIMITS.footerChars) : ''
+}
+
+function addressCandidates(bodyText: string, footer: string): string[] {
   const fromElements = Array.from(
     document.querySelectorAll('address, [itemprop="address"], [class*="address" i]'),
   )
@@ -249,7 +260,13 @@ function addressCandidates(bodyText: string): string[] {
     .map(textOf)
     .filter((t) => t.length > 8 && t.length < 160)
   const fromText = (bodyText.match(AU_ADDRESS_PATTERN) ?? []).map((t) => normaliseWhitespace(t))
-  return unique([...fromElements, ...fromText], LIMITS.addresses)
+  // Other countries' address formats, with a little leading context (street, suburb).
+  const searchable = `${footer}\n${bodyText}`
+  const international = MARKETS.filter((m) => m.code !== 'AU').flatMap((m) => {
+    const match = new RegExp(`[A-Za-z0-9 ,.'/-]{0,60}(?:${m.address.source})`, m.address.flags).exec(searchable)
+    return match ? [normaliseWhitespace(match[0])] : []
+  })
+  return unique([...fromElements, ...fromText, ...international], LIMITS.addresses)
 }
 
 function tracking(): TrackingSignals {
@@ -363,7 +380,8 @@ export async function extract(): Promise<PageExtraction> {
   const { ctas: ctaSignals, buttonCount } = ctas()
   const contact = contacts(links.anchors, bodyText)
   const schemaResult = schema()
-  const addresses = addressCandidates(bodyText)
+  const footer = footerText()
+  const addresses = addressCandidates(bodyText, footer)
   const [performanceSignals, robots, rawWords] = await Promise.all([measurePerformance(), robotsSignal(), rawWordCount()])
 
   return {
@@ -388,6 +406,7 @@ export async function extract(): Promise<PageExtraction> {
     emails: contact.emails,
     socialLinks: socialLinks(links.anchors),
     addressCandidates: addresses,
+    footerText: footer,
     schema: schemaResult.summary,
     openGraph: {
       title: meta('meta[property="og:title"]'),

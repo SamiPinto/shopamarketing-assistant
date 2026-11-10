@@ -1,3 +1,4 @@
+import type { MarketCode } from '../data/markets'
 import type { PageExtraction, SocialPlatform, TechItem } from './page'
 
 export type CategoryId =
@@ -90,6 +91,8 @@ export interface BusinessProfile {
   url: string
   industry: { id: IndustryId; label: string; basis: string } | null
   location: { label: string; basis: string } | null
+  /** Country the business appears to be in. Missing on analyses saved before this existed. */
+  country?: { code: MarketCode; name: string; basis: string } | null
   socialPlatforms: SocialPlatform[]
 }
 

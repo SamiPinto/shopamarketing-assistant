@@ -1,4 +1,5 @@
 import type { BusinessProfile, CategoryResult, Check, CheckStatus, Rating3, WebsiteProfile } from '../../types/analysis'
+import { marketByCode } from '../../data/markets'
 import type { PageExtraction } from '../../types/page'
 import { listJoin, lowerFirst, plural } from '../../utils/format'
 import { PRIMARY_CTA_INTENTS, SOCIAL_LABELS, SOCIAL_PLATFORMS } from '../../utils/signals'
@@ -237,7 +238,11 @@ const LOCAL_SCHEMA = /(LocalBusiness|Dentist|Restaurant|Store|MedicalClinic|Phys
 
 export function analyseLocal(page: PageExtraction, business: BusinessProfile): CategoryResult {
   const localSchema = page.schema.types.find((t) => LOCAL_SCHEMA.test(t))
-  const isAu = /\.au$/.test(page.domain) || /en-au/i.test(page.lang ?? '')
+  // Domain ending or html lang region matching the business's country (Australia when unknown).
+  const market = marketByCode(business.country?.code ?? 'AU')!
+  const langRegion = (page.lang ?? '').split(/[-_]/)[1]?.toUpperCase()
+  const regional = market.tlds.test(page.domain) || langRegion === market.code
+  const regionalDomain = market.tlds.source.replace(/[\\$]/g, '') // "\.au$" → ".au"
   const hasAddress = Boolean(page.schema.streetAddress) || page.addressCandidates.length > 0
 
   const checks: Check[] = [
@@ -253,9 +258,11 @@ export function analyseLocal(page: PageExtraction, business: BusinessProfile): C
     makeCheck('local-schema', 'Local business schema', localSchema ? 'good' : 'not-detected',
       localSchema ? `Schema type "${localSchema}" detected.` : 'No LocalBusiness-type schema detected.',
       'LocalBusiness schema states address, hours and contact details in a machine-readable way.', 2),
-    makeCheck('local-market', 'Australian market signal', isAu ? 'good' : 'attention',
-      isAu ? 'Australian domain or en-AU language detected.' : 'No .au domain or en-AU language attribute detected.',
-      'Regional signals help search engines match the site to Australian searches.', 1),
+    makeCheck('local-market', `${market.name} market signal`, regional ? 'good' : 'attention',
+      regional
+        ? `${market.name} domain or en-${market.code} language detected.`
+        : `No ${regionalDomain} domain or en-${market.code} language attribute detected.`,
+      `Regional signals help search engines match the site to searches in ${market.name}.`, 1),
     makeCheck('local-gbp', 'Google Business Profile', 'unknown',
       'Requires further research — not visible from the website alone.',
       'Profile completeness, reviews and map-pack visibility need Google Business Profile data (planned API capability).', 0),

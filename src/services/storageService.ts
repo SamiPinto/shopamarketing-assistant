@@ -1,5 +1,6 @@
 import type { MarketingAnalysis } from '../types/analysis'
 import type { WebsiteIntel } from '../types/intel'
+import type { CompetitorLocation, KeywordReport, RankedKeywordsReport } from '../types/keywords'
 import { SCORING_VERSION } from './analysis/version'
 import type { OOHBriefInput } from '../types/ooh'
 import { DEFAULT_SETTINGS, type Settings } from '../types/misc'
@@ -64,6 +65,10 @@ const KEYS = {
   briefs: 'oohBriefDrafts',
   intel: 'websiteIntel',
   competitors: 'competitorLinks',
+  keywords: 'keywordReports',
+  competitorLocations: 'competitorLocations',
+  clientPoints: 'clientAreaPoints',
+  rankedKeywords: 'rankedKeywordReports',
 } as const
 
 const MAX_RECENT = 8
@@ -125,6 +130,57 @@ export const storageService = {
     const map = (await store.get<Record<string, WebsiteIntel>>(KEYS.intel)) ?? {}
     const entries = Object.entries({ ...map, [intel.domain]: intel }).slice(-40)
     await store.set(KEYS.intel, Object.fromEntries(entries))
+  },
+
+  /** Latest Google keyword ranking check for a domain. */
+  async getKeywordReport(domain: string): Promise<KeywordReport | null> {
+    const map = (await store.get<Record<string, KeywordReport>>(KEYS.keywords)) ?? {}
+    return map[domain] ?? null
+  },
+
+  /** Keywords a domain already ranks for (DataForSEO), last lookup per domain. */
+  async getRankedKeywords(domain: string): Promise<RankedKeywordsReport | null> {
+    const map = (await store.get<Record<string, RankedKeywordsReport>>(KEYS.rankedKeywords)) ?? {}
+    return map[domain] ?? null
+  },
+
+  async saveRankedKeywords(report: RankedKeywordsReport): Promise<void> {
+    const map = (await store.get<Record<string, RankedKeywordsReport>>(KEYS.rankedKeywords)) ?? {}
+    const { [report.domain]: _previous, ...rest } = map
+    const entries = Object.entries({ ...rest, [report.domain]: report }).slice(-20)
+    await store.set(KEYS.rankedKeywords, Object.fromEntries(entries))
+  },
+
+  async saveKeywordReport(report: KeywordReport): Promise<void> {
+    const map = (await store.get<Record<string, KeywordReport>>(KEYS.keywords)) ?? {}
+    const { [report.domain]: _previous, ...rest } = map
+    const entries = Object.entries({ ...rest, [report.domain]: report }).slice(-20)
+    await store.set(KEYS.keywords, Object.fromEntries(entries))
+  },
+
+  /** Where search competitors are, read from their websites (by domain). */
+  async getCompetitorLocations(): Promise<Record<string, CompetitorLocation>> {
+    return (await store.get<Record<string, CompetitorLocation>>(KEYS.competitorLocations)) ?? {}
+  },
+
+  async saveCompetitorLocation(location: CompetitorLocation): Promise<void> {
+    const map = await this.getCompetitorLocations()
+    const { [location.domain]: _previous, ...rest } = map
+    const entries = Object.entries({ ...rest, [location.domain]: location }).slice(-200)
+    await store.set(KEYS.competitorLocations, Object.fromEntries(entries))
+  },
+
+  /** Map positions of a client's own suburbs/pincodes, keyed by domain then place query. */
+  async getClientPoints(domain: string): Promise<Record<string, { lat: number; lon: number }>> {
+    const map = (await store.get<Record<string, Record<string, { lat: number; lon: number }>>>(KEYS.clientPoints)) ?? {}
+    return map[domain] ?? {}
+  },
+
+  async saveClientPoints(domain: string, points: Record<string, { lat: number; lon: number }>): Promise<void> {
+    const map = (await store.get<Record<string, Record<string, { lat: number; lon: number }>>>(KEYS.clientPoints)) ?? {}
+    const { [domain]: _previous, ...rest } = map
+    const entries = Object.entries({ ...rest, [domain]: points }).slice(-40)
+    await store.set(KEYS.clientPoints, Object.fromEntries(entries))
   },
 
   /** Competitor analyses a salesperson linked to an analysis (by analysis id). */

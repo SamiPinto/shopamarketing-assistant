@@ -164,6 +164,20 @@ suggestions, their sections in the reports and the client report, and the
 outdoor-advertising question. To bring them back, set the flag to `true`, run
 `npm run build` and reload the extension.
 
+### DataForSEO (keyword rankings and search volumes)
+
+SEO › Keyword rankings uses DataForSEO when a login is set, otherwise the free
+Google-tab method.
+
+1. Copy `.env.example` to `.env` (already done once; `.env` is git-ignored).
+2. Fill in `VITE_DATAFORSEO_LOGIN` and `VITE_DATAFORSEO_PASSWORD` from
+   <https://app.dataforseo.com/api-access>. The API password is not the website password.
+3. `npm run build` (or restart `npm run watch`) and reload the extension.
+
+Each search costs about US$0.002 per Google results page, plus about US$0.075 per
+run for search volumes; the dashboard shows the estimate and the balance. The login
+is built into the extension files, so only share the built extension inside the team.
+
 ## 8. Reloading after code changes
 
 Chrome extensions do not hot-reload the way a normal Vite site does.

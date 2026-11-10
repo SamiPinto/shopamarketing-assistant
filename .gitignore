@@ -23,3 +23,8 @@ dist.zip
 *.njsproj
 *.sln
 *.sw?
+
+# Local secrets (DataForSEO API login)
+.env
+.env.*
+!.env.example

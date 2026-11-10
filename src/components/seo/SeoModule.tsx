@@ -1,33 +1,30 @@
 import type { ModuleProps } from '../../pages/dashboardRoutes'
-import { CategoryDetail } from '../overview/CategoryDetail'
-import { Notice } from '../ui/Primitives'
+import { CATEGORY_ICONS } from '../overview/categoryMeta'
+import { KeywordRankings } from './KeywordRankings'
 
+/** SEO screen: Google rankings by location against local competitors, nothing else. */
 export default function SeoModule({ analysis }: ModuleProps) {
-  const { page } = analysis
+  const Icon = CATEGORY_ICONS.seo
   return (
-    <CategoryDetail
-      analysis={analysis}
-      id="seo"
-      checksTitle="SEO check"
-      description="Deterministic on-page SEO checks. Expand “Why this matters” for the reasoning behind each check."
-      aside={
-        <section className="panel" aria-labelledby="serp-preview">
-          <h2 id="serp-preview" className="panel__title">
-            Search result preview
-          </h2>
-          <div className="serp">
-            <p className="serp__url mono">{page.canonical ?? page.url}</p>
-            <p className="serp__title">{page.title || 'No title detected'}</p>
-            <p className="serp__desc">
-              {page.metaDescription ?? 'No meta description — search engines would choose a snippet from page text.'}
-            </p>
-          </div>
-          <Notice tone="info">
-            Illustrative only. Actual search snippets are chosen by the search engine. Rankings, crawl status and
-            backlinks require an SEO data provider (planned).
-          </Notice>
-        </section>
-      }
-    />
+    <div className="module">
+      <header className="module-header">
+        <div className="module-header__title-row">
+          <span className="module-header__icon">
+            <Icon size={18} aria-hidden="true" />
+          </span>
+          <h1 className="module-header__title">{analysis.categories.seo.label}</h1>
+        </div>
+        <p className="module-header__description">
+          Whether {analysis.business.name} ranks on Google for its services in each suburb, city or pincode, at which
+          position, and which competitors rank above it.
+        </p>
+      </header>
+
+      <div className="module-grid module-grid--single">
+        <div className="module-grid__main">
+          <KeywordRankings analysis={analysis} />
+        </div>
+      </div>
+    </div>
   )
 }

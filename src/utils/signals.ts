@@ -85,6 +85,9 @@ export const SOCIAL_PLATFORMS: SocialPlatform[] = [
 export const AU_PHONE_PATTERN =
   /(?:\+61[\s-]?|\(0[2378]\)\s?|\b0)[2-478](?:[\s-]?\d){8}\b|\b1[38]00(?:[\s-]?\d){6}\b|\b13(?:[\s-]?\d){4}\b/g
 
+/** Numbers written in international format, e.g. "+44 20 7946 0958" or "+1 (415) 555-0100". */
+export const INTL_PHONE_PATTERN = /\+\d{1,3}[\s.-]?\(?\d{1,4}\)?(?:[\s.-]?\d{2,5}){2,4}/g
+
 export const EMAIL_PATTERN = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
 
 /** Street-address-like fragment ending in an Australian state and postcode. */
