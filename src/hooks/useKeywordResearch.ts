@@ -105,7 +105,9 @@ export function useKeywordResearch(analysis: MarketingAnalysis): KeywordResearch
               basis: 'Checked previously',
             })),
         )
-        setSelected(services)
+        // Also tick the "best <service>" search when an earlier check didn't include it.
+        const best = siteIdeas.find((c) => c.keyword.startsWith('best '))?.keyword
+        setSelected(best && !services.includes(best) && services.length < MAX_SELECTED ? [best, ...services] : services)
         const places = reportPlaces(saved)
         setExtraPlaces(
           places

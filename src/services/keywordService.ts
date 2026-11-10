@@ -2,7 +2,7 @@ import { INDUSTRIES } from '../data/industries'
 import { registrableDomain } from '../data/providers'
 import { matchesDomain } from '../data/directories'
 import { MARKETS, WORLDWIDE } from '../data/markets'
-import type { MarketingAnalysis } from '../types/analysis'
+import type { IndustryId, MarketingAnalysis } from '../types/analysis'
 import type {
   KeywordCandidate,
   KeywordRanking,
@@ -119,11 +119,15 @@ export function serviceFromKeyword(analysis: MarketingAnalysis, keyword: string)
   return stripPlaces(normaliseKeyword(keyword), placeTokens(analysis)) || normaliseKeyword(keyword)
 }
 
-/** The Google search for a service in a place: "blocked drains" + "2150" → "blocked drains 2150". */
+/**
+ * The Google search for a service in a place: "blocked drains" + "2150" → "blocked drains 2150".
+ * "Best …" searches read naturally with "in": "best child care" + "Colyton" → "best child care in colyton".
+ */
 export function queryFor(service: string, place: string | null): string {
   if (!place) return service
   const p = normaliseKeyword(place)
-  return service.includes(p) ? service : `${service} ${p}`
+  if (service.includes(p)) return service
+  return /^best /.test(service) ? `${service} in ${p}` : `${service} ${p}`
 }
 
 export interface MarketChoice extends SearchMarket {
@@ -209,10 +213,73 @@ function collectSeeds(analysis: MarketingAnalysis): Seed[] {
 }
 
 /** Service keyword ideas from the analysed page only (instant, no network). */
+// Schema types too broad to name the business in a search ("best educational organization").
+const VAGUE_SCHEMA = /\b(organization|business|establishment|location|service|store)$/
+
+// What people search for when the site gives no better name, by industry.
+const INDUSTRY_SEARCH_NAME: Partial<Record<IndustryId, string>> = {
+  dental: 'dentist',
+  medical: 'doctor',
+  fitness: 'gym',
+  hospitality: 'restaurant',
+  legal: 'lawyer',
+  'real-estate': 'real estate agent',
+  automotive: 'mechanic',
+  beauty: 'beauty salon',
+  finance: 'accountant',
+  construction: 'builder',
+}
+
+/** What the business is, in the words people search: "child care", "dentist", "plumber". */
+// People search for the tradesperson, not the trade: "best plumber", not "best plumbing".
+const TRADESPERSON: Record<string, string> = {
+  plumbing: 'plumber',
+  electrical: 'electrician',
+  roofing: 'roofer',
+  painting: 'painter',
+  landscaping: 'landscaper',
+  cleaning: 'cleaner',
+  carpentry: 'carpenter',
+  tiling: 'tiler',
+  fencing: 'fencer',
+  concreting: 'concreter',
+  plastering: 'plasterer',
+  bricklaying: 'bricklayer',
+}
+
+function mainService(analysis: MarketingAnalysis, seeds: Seed[]): string | null {
+  const strip = (phrase: string) => {
+    const out = phrase.replace(/^best /, '')
+    return TRADESPERSON[out] ?? out
+  }
+  // A specific schema type ("ChildCare", "Dentist") is the clearest statement.
+  for (const type of analysis.page.schema.types) {
+    const phrase = clean(schemaPhrase(type))
+    if (!GENERIC_SCHEMA.has(type.toLowerCase()) && phrase && !VAGUE_SCHEMA.test(phrase) && wordsOf(phrase).length <= 3) {
+      return strip(phrase)
+    }
+  }
+  // Otherwise the site's strongest short service phrase, preferring the industry's own words.
+  const industry = INDUSTRIES.find((i) => i.id === analysis.business.industry?.id)
+  const short = seeds.filter((s) => wordsOf(s.phrase).length <= 3)
+  const best = short.find((s) => industry?.keywords.some((k) => s.phrase.includes(k.trim()))) ?? short[0]
+  if (best) return strip(best.phrase)
+  return analysis.business.industry ? (INDUSTRY_SEARCH_NAME[analysis.business.industry.id] ?? null) : null
+}
+
 export function suggestFromSite(analysis: MarketingAnalysis): KeywordCandidate[] {
-  return collectSeeds(analysis)
+  const seeds = collectSeeds(analysis)
+  const ideas: KeywordCandidate[] = seeds
     .slice(0, MAX_SUGGESTIONS)
     .map((seed) => ({ keyword: seed.phrase, source: 'site', basis: seed.basis }))
+  // "best child care", searched as "best child care in colyton": how people compare local businesses.
+  const main = mainService(analysis, seeds)
+  if (!main) return ideas
+  const best = `best ${main}`
+  return [
+    { keyword: best, source: 'site', basis: `“best” + main service, searched as “${best} in <location>”` },
+    ...ideas.filter((c) => c.keyword !== best),
+  ]
 }
 
 /** Real searches from Google Autocomplete that extend the top site keywords. */
