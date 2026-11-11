@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && vite build -c vite.content.config.ts",
+    "pack:store": "npm run build && node scripts/pack-store.mjs",
     "watch": "npm run build && node scripts/watch.mjs",
     "preview": "vite preview --open /popup.html",
     "typecheck": "tsc -b",
-    "lint": "oxlint",
-    "icons": "node scripts/generate-icons.mjs"
+    "lint": "oxlint"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",

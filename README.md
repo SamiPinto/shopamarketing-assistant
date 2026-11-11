@@ -102,7 +102,6 @@ Other scripts:
 | `npm run preview` | Serve the built `dist/` in a normal tab |
 | `npm run typecheck` | `tsc -b` only |
 | `npm run lint` | oxlint |
-| `npm run icons` | Regenerate the PNG icons (Shopa purple gradient) from `scripts/generate-icons.mjs`. The same mark is in `public/icons/icon.svg` |
 
 ## 6. Production build
 
