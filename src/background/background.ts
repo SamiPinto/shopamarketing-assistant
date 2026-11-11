@@ -1,12 +1,14 @@
 /**
  * MV3 service worker. Kept intentionally small: it seeds default settings on
- * install and opens (or focuses) the full dashboard tab. Page extraction runs
- * from the popup using the activeTab grant, so no host permissions are needed.
+ * install, runs Microsoft sign-in and opens (or focuses) the full dashboard tab.
+ * Page extraction runs from the popup using the activeTab grant.
  */
+import { handleAuthMessages } from '../services/authService'
 import { DEFAULT_SETTINGS, type OpenDashboardRequest } from '../types/misc'
 import { startBackgroundDevReload } from '../utils/devReload'
 
 startBackgroundDevReload()
+handleAuthMessages()
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason !== 'install') return

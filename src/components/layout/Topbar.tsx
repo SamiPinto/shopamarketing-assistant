@@ -1,4 +1,5 @@
 import { useAnalysis } from '../../hooks/analysisContextValue'
+import { AccountMenu } from '../auth/AuthGate'
 import { relativeTime } from '../../utils/format'
 import { DeleteAnalysisButton } from './DeleteAnalysisButton'
 import { SettingsButton } from './SettingsDialog'
@@ -28,6 +29,7 @@ export function Topbar() {
       <div className="topbar__right">
         <SettingsButton />
         {current && <DeleteAnalysisButton key={current.id} analysis={current} />}
+        <AccountMenu />
       </div>
     </div>
   )

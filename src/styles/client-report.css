@@ -16,6 +16,8 @@
 
 .client-report {
   display: grid;
+  /* One column that never grows past the page, even with wide tables inside. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
   padding: 40px 48px;
   border: 1px solid var(--line);

@@ -267,6 +267,8 @@
 }
 
 .compare-table thead th {
+  /* Long competitor web addresses wrap instead of widening the table. */
+  overflow-wrap: anywhere;
   font-size: var(--text-xs);
   color: var(--muted);
 }

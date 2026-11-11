@@ -178,6 +178,30 @@ Each search costs about US$0.002 per Google results page, plus about US$0.075 pe
 run for search volumes; the dashboard shows the estimate and the balance. The login
 is built into the extension files, so only share the built extension inside the team.
 
+### Microsoft sign-in
+
+Everyone signs in with their office Microsoft account before using the popup or
+dashboard. There is no separate username or password. The extension ID is fixed by
+the `key` in `public/manifest.json` (ID `gchgencpbolnoebmgidhfjpgcoephicg`), so every
+copy uses the same sign-in return address. The matching private key is
+`extension-key.pem` (git-ignored); keep it safe in case the extension is ever packed.
+
+One-time setup by an IT admin in the Microsoft Entra admin center
+(<https://entra.microsoft.com>):
+
+1. **App registrations › New registration**: name it "Shopa Marketing Assistant",
+   choose **Accounts in this organizational directory only**.
+2. **Authentication › Add a platform › Single-page application**, redirect URI
+   `https://gchgencpbolnoebmgidhfjpgcoephicg.chromiumapp.org/`. No client secret is needed.
+3. Copy the **Application (client) ID** and **Directory (tenant) ID** from Overview into
+   `VITE_MS_CLIENT_ID` and `VITE_MS_TENANT_ID` in `.env`, then `npm run build`.
+4. Optional: **Enterprise applications › Shopa Marketing Assistant › Properties ›
+   Assignment required = Yes**, then add the sales team under **Users and groups**.
+
+A sign-in lasts 12 hours and then renews without a click while the Microsoft session
+is active. The sign-in only controls who can open the tool; the extension has no
+server, so it is not protection for the DataForSEO login built into its files.
+
 ## 8. Reloading after code changes
 
 Chrome extensions do not hot-reload the way a normal Vite site does.

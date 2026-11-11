@@ -4,16 +4,19 @@
   "short_name": "Shopa Assistant",
   "version": "1.2.0",
   "description": "Turn any business website into a marketing opportunity. Internal research assistant for the Shopa Marketing team.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu3SE9eR9RVcK2z4vAokUivy5b8NKvHnsLcKk1b/+cv9c8XvMTIVFX/SE0LJgEKneTQv+TGAzXcHcrTKbykKoYKdtguSsW5VZEpX+v2flxGEMx9praosmpJ6pcaCeqSgdvwdnfaiHfcqZwq6HOFrcSRytmGFfxLWAbD/lkv+VeZZCDf7HcB0s8Ho/vI2H0FPi/csC+PbvCTCZtzfp/raUB6L6pWeQQ6jd2qC/ua9+9hKjAirFRIc0hKjt7TPAFaSeH8LsxdVjMLjqGrulYbs2dWMob/Ir7HRJ4FfJjK49S/EtrzOAYVTPfec4NzWd/mM2tXnGt08xIhhbq5q42Umm9wIDAQAB",
   "minimum_chrome_version": "116",
   "permissions": [
     "storage",
     "activeTab",
     "scripting",
-    "tabs"
+    "tabs",
+    "identity"
   ],
   "host_permissions": [
     "https://web.archive.org/*",
-    "https://api.dataforseo.com/*"
+    "https://api.dataforseo.com/*",
+    "https://login.microsoftonline.com/*"
   ],
   "optional_host_permissions": [
     "https://*/*",

@@ -608,5 +608,6 @@ export function seoTalkingPoint(a: MarketingAnalysis, report: KeywordReport | nu
   if (rankings.length === 0) return null
   if (rankings.some((k) => k.position !== null && pageOf(k, k.position) === 1)) return null
   const searches = plural(rankings.length, 'Google search', 'Google searches')
-  return `We checked ${searches} your customers make, and ${a.business.name} isn’t on page 1 for ${rankings.length === 1 ? 'it' : 'any of them'}. Those customers are going to competitors, and better SEO can win them back.`
+  const keywords = listJoin([...new Set(rankings.map((k) => `“${k.keyword}”`))])
+  return `We checked ${searches} your customers make (${keywords}), and ${a.business.name} isn’t on page 1 for ${rankings.length === 1 ? 'it' : 'any of them'}. Those customers are going to competitors, and better SEO can win them back.`
 }

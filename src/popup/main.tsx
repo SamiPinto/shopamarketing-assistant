@@ -4,6 +4,7 @@ import '@fontsource-variable/bricolage-grotesque/standard.css'
 import '@fontsource-variable/instrument-sans/standard.css'
 import '../styles/index.css'
 import '../styles/popup.css'
+import { AuthGate } from '../components/auth/AuthGate'
 import { isExtensionContext } from '../utils/chrome'
 import { Popup } from './Popup'
 
@@ -12,6 +13,8 @@ if (!isExtensionContext()) document.body.classList.add('dev-preview')
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Popup />
+    <AuthGate variant="popup">
+      <Popup />
+    </AuthGate>
   </StrictMode>,
 )

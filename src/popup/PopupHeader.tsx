@@ -1,5 +1,6 @@
 import { LayoutDashboard } from 'lucide-react'
 import { useOpenDashboard } from '../hooks/useOpenDashboard'
+import { AccountMenu } from '../components/auth/AuthGate'
 import { BrandLogo } from '../components/ui/Primitives'
 
 export function PopupHeader() {
@@ -25,6 +26,7 @@ export function PopupHeader() {
         >
           <LayoutDashboard size={16} aria-hidden="true" />
         </button>
+        <AccountMenu compact />
       </div>
     </header>
   )

@@ -51,4 +51,9 @@
     break-inside: avoid;
   }
 
+  /* Tables print in full rather than scrolling. */
+  .table-scroll {
+    overflow: visible;
+  }
+
 }

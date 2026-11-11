@@ -28,3 +28,6 @@ dist.zip
 .env
 .env.*
 !.env.example
+
+# Private key that fixes the extension ID (keep it safe, never commit it)
+extension-key.pem

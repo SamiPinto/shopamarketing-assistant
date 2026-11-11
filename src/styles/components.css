@@ -1211,3 +1211,104 @@
 .check-group--good .check-group__title { color: var(--good); }
 .check-group--attention { border-top-color: var(--attention); }
 .check-group--attention .check-group__title { color: var(--attention); }
+
+/* ============ Microsoft sign-in ============ */
+
+.sign-in {
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: var(--paper);
+}
+
+.sign-in--page {
+  min-height: 100vh;
+  background:
+    radial-gradient(80% 60% at 100% 0%, var(--accent-wash), transparent 70%),
+    var(--paper);
+}
+
+.sign-in--popup {
+  width: 420px;
+  height: 600px;
+}
+
+.sign-in__card {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  width: 100%;
+  max-width: 400px;
+  padding: 28px 28px 30px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.sign-in--popup .sign-in__card {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 8px 6px;
+}
+
+.sign-in__title {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-stretch: var(--display-narrow);
+  font-size: 32px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.sign-in__text {
+  color: var(--ink-3);
+}
+
+/* Microsoft's sign-in button style: white, thin grey border, their logo on the left. */
+.sign-in__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #8c8c8c;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: #5e5e5e;
+  font-family: 'Segoe UI', var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+
+.sign-in__button:hover:not(:disabled) {
+  background: #f3f3f3;
+}
+
+.sign-in__button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.account__name {
+  max-width: 18ch;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
