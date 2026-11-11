@@ -877,18 +877,21 @@ body.surface-dashboard {
 }
 
 .report-document__section {
-  padding-top: 24px;
-  break-inside: avoid-page;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
 }
 
 .report-document__section h2 {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-family: var(--font-display);
-  font-size: var(--text-xl);
-  font-weight: 600;
+  font-size: var(--text-2xl);
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
 }
 
 .report-document__num {
@@ -902,13 +905,71 @@ body.surface-dashboard {
   color: var(--ink-2);
 }
 
-.report-document__section ul {
+.report-items {
   display: grid;
-  gap: 4px;
-  list-style: disc;
-  padding-left: 20px;
-  color: var(--ink-3);
+  margin-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.report-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  break-inside: avoid;
+}
+
+.report-item p {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+}
+
+.report-item strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.report-item__detail {
   font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.report-item__icon {
+  flex: none;
+  margin-top: 2px;
+}
+
+.report-item__dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin: 7px 4px 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.report-item--good .report-item__icon { color: var(--good); }
+.report-item--unknown .report-item__icon { color: var(--absent); }
+
+/* Problems found read in red: marker, label and detail. */
+.report-item--bad .report-item__icon,
+.report-item--bad strong,
+.report-item--bad .report-item__detail {
+  color: var(--danger);
+}
+
+.report-document__sub {
+  margin-top: 20px;
+  break-inside: avoid;
+}
+
+.report-document__h3 {
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
 }
 
 .report-document__footer {
@@ -1304,4 +1365,95 @@ body.surface-dashboard {
   font-size: 0.85em;
   font-weight: 500;
   white-space: nowrap;
+}
+
+/* ============ Ads running (ad libraries) ============ */
+
+.ads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.ads-card {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.ads-card--on {
+  border-color: var(--accent-line);
+  background: var(--accent-wash);
+}
+
+.ads-card__platform {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.ads-card__count {
+  font-family: var(--font-display);
+  font-stretch: var(--display-narrow);
+  font-size: 36px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.ads-card__count span {
+  font-family: var(--font-sans);
+  font-stretch: normal;
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink-3);
+}
+
+.ads-card--on .ads-card__count {
+  color: var(--accent-strong);
+}
+
+.ads-card__period,
+.ads-card__by {
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.ads-card__error {
+  font-size: var(--text-sm);
+  color: var(--attention);
+}
+
+.ads-card__split {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--accent-line);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+}
+
+.ads-card__split li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ads-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: var(--text-xs);
+}
+
+.ads-other {
+  margin-top: 4px;
 }

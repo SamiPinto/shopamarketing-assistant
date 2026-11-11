@@ -30,10 +30,6 @@ export function SettingsButton() {
         <div className="form">
           <div className="form__grid">
             <label className="field">
-              <span className="field__label">Prepared by (on reports)</span>
-              <input type="text" value={settings.preparedBy} placeholder="Your name" onChange={(e) => void updateSettings({ preparedBy: e.target.value })} />
-            </label>
-            <label className="field">
               <span className="field__label">Contact line (on reports)</span>
               <input type="text" value={settings.contactLine} placeholder="email · phone" onChange={(e) => void updateSettings({ contactLine: e.target.value })} />
             </label>

@@ -275,6 +275,16 @@
   background: var(--accent-wash);
 }
 
+.compare-table__self {
+  background: var(--accent-wash);
+}
+
+.search-compare__note {
+  margin-bottom: 6px;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
 .compare-table__you {
   font-weight: 500;
   color: var(--accent-strong);

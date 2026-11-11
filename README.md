@@ -152,8 +152,8 @@ Choose one of these:
 
 Before publishing, raise `version` in `public/manifest.json` for every update.
 
-Each salesperson should fill in **Prepared by** and **Contact** once on the Client
-Report page. These are saved locally and printed on every report.
+Each salesperson should fill in **Contact** once on the Client Report page.
+It is saved locally and printed on every client report.
 
 ### Feature switches
 

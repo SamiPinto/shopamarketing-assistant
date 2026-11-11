@@ -212,14 +212,14 @@ export function analyseAdvertising(page: PageExtraction): CategoryResult {
     ),
   )
   checks.push(
-    makeCheck('ads-activity', 'Active campaigns & spend', 'unknown',
-      'Paid advertising cannot be confirmed from this page alone.',
-      'Campaign activity and spend require ad-library or platform data (planned API capability). Tags only show tracking is set up.', 0),
+    makeCheck('ads-activity', 'Ad spend & results', 'unknown',
+      'Ad spend, clicks and results are not public.',
+      'Tags only show tracking is set up. Public ad libraries show how many ads are running, but not what they cost or achieve.', 0),
   )
   const adTags = TAG_LABELS.filter(([key]) => ['googleAds', 'metaPixel', 'linkedInInsight', 'tiktokPixel'].includes(key) && page.tracking[key])
   const summary = adTags.length
-    ? `${listJoin(adTags.map(([, label]) => label))} detected — tracking is set up, but campaign activity cannot be confirmed from this page.`
-    : 'No advertising tags detected on this page. Paid advertising cannot be confirmed from this page alone.'
+    ? `${listJoin(adTags.map(([, label]) => label))} detected, so ad tracking is set up on the website.`
+    : 'No advertising tags detected on this page. They may load later through Google Tag Manager or after cookie consent.'
   return {
     id: 'advertising',
     label: 'Advertising',

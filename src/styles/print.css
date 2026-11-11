@@ -46,7 +46,8 @@
     break-after: avoid-page;
   }
 
-  .report-document__section li {
+  .report-document__section li,
+  .report-document__sub tr {
     break-inside: avoid;
   }
 

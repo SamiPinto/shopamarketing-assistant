@@ -1,4 +1,5 @@
-import { ArrowRight, CircleCheck, CircleDashed, CircleHelp, Sparkles, TriangleAlert, type LucideIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { CircleCheck, CircleDashed, CircleHelp, Sparkles, TriangleAlert, type LucideIcon } from 'lucide-react'
 import type { ClientReport, GlanceStatus } from '../../types/clientReport'
 import { BrandLogo } from '../ui/Primitives'
 import { WebsiteFactsGrid } from '../website/WebsiteFactsGrid'
@@ -10,8 +11,8 @@ const GLANCE_ICON: Record<GlanceStatus, LucideIcon> = {
   unknown: CircleHelp,
 }
 
-/** Printable 1–2 page A4 client snapshot. */
-export function ClientReportDocument({ report }: { report: ClientReport }) {
+/** Printable 1–2 page A4 client snapshot. `search` is shown after the website comparison. */
+export function ClientReportDocument({ report, search }: { report: ClientReport; search?: ReactNode }) {
   return (
     <article className="client-report" aria-label="Website opportunity snapshot">
       <header className="client-report__header">
@@ -71,6 +72,8 @@ export function ClientReportDocument({ report }: { report: ClientReport }) {
           </table>
         </section>
       )}
+
+      {search}
 
       <section className="client-report__section">
         <h2 className="client-report__h2">Marketing at a glance</h2>
@@ -145,24 +148,7 @@ export function ClientReportDocument({ report }: { report: ClientReport }) {
         </ol>
       </section>
 
-      <section className="client-report__next">
-        <h2 className="client-report__h2 client-report__h2--light">Suggested next steps</h2>
-        <ol>
-          {report.nextSteps.map((s) => (
-            <li key={s}>
-              <ArrowRight size={14} aria-hidden="true" />
-              {s}
-            </li>
-          ))}
-        </ol>
-        {(report.preparedBy || report.contactLine) && (
-          <p className="client-report__contact">
-            {report.preparedBy && <strong>{report.preparedBy}</strong>}
-            {report.preparedBy && report.contactLine && ' · '}
-            {report.contactLine}
-          </p>
-        )}
-      </section>
+      {report.contactLine && <p className="client-report__contact">{report.contactLine}</p>}
 
       <footer className="client-report__footer">{report.disclaimer}</footer>
     </article>

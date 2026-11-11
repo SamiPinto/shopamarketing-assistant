@@ -57,7 +57,7 @@ export const templateInsightProvider: InsightProvider = {
       .map(([id]) => id)
 
     const summary = [
-      `The analysis of ${analysis.business.domain} identified ${plural(signals, 'marketing opportunity signal')}.`,
+      `The analysis of ${analysis.business.domain} identified ${plural(signals, 'opportunity signal')}.`,
     ]
     if (strongest.length) {
       summary.push(

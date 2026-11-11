@@ -1,3 +1,4 @@
+import type { AdsReport } from '../types/ads'
 import type { MarketingAnalysis } from '../types/analysis'
 import type { WebsiteIntel } from '../types/intel'
 import type { CompetitorLocation, KeywordReport, RankedKeywordsReport } from '../types/keywords'
@@ -69,6 +70,7 @@ const KEYS = {
   competitorLocations: 'competitorLocations',
   clientPoints: 'clientAreaPoints',
   rankedKeywords: 'rankedKeywordReports',
+  ads: 'adsReports',
 } as const
 
 const MAX_RECENT = 8
@@ -150,6 +152,19 @@ export const storageService = {
     const { [report.domain]: _previous, ...rest } = map
     const entries = Object.entries({ ...rest, [report.domain]: report }).slice(-20)
     await store.set(KEYS.keywords, Object.fromEntries(entries))
+  },
+
+  /** Latest ad-library check for a domain. */
+  async getAdsReport(domain: string): Promise<AdsReport | null> {
+    const map = (await store.get<Record<string, AdsReport>>(KEYS.ads)) ?? {}
+    return map[domain] ?? null
+  },
+
+  async saveAdsReport(report: AdsReport): Promise<void> {
+    const map = (await store.get<Record<string, AdsReport>>(KEYS.ads)) ?? {}
+    const { [report.domain]: _previous, ...rest } = map
+    const entries = Object.entries({ ...rest, [report.domain]: report }).slice(-20)
+    await store.set(KEYS.ads, Object.fromEntries(entries))
   },
 
   /** Where search competitors are, read from their websites (by domain). */

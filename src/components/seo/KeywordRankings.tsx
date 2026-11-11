@@ -38,7 +38,7 @@ const PAGE_OPTIONS = [
 
 function notFoundText(ranking: KeywordRanking): string {
   if (!ranking.pagesChecked) return '?'
-  return ranking.pagesChecked === 1 ? 'not p1' : `not p1–${ranking.pagesChecked}`
+  return ranking.pagesChecked === 1 ? 'not page 1' : `not page 1–${ranking.pagesChecked}`
 }
 
 // DataForSEO list prices (USD): a live Google results page of 10, and one search-volume request.
@@ -381,7 +381,7 @@ function AlreadyRanking({ analysis, kw }: { analysis: MarketingAnalysis; kw: Key
                       <td>
                         <span className={`kw-pos kw-pos--${tone}`}>
                           #{k.position}
-                          <span className="kw-pos__page"> · p{page}</span>
+                          <span className="kw-pos__page"> · page {page}</span>
                         </span>
                       </td>
                       <td>{k.volume ? k.volume.toLocaleString() : '<10'}</td>
@@ -498,6 +498,63 @@ function KeywordResults({ analysis, report }: { analysis: MarketingAnalysis; rep
         </section>
       )}
 
+      <section className="panel" aria-labelledby="kw-compare">
+        <div className="panel__head">
+          <h2 id="kw-compare" className="panel__title">
+            You vs {loc.localOnly && Object.keys(loc.locations).length > 0 ? 'local ' : ''}search competitors
+          </h2>
+          <span className="panel__note">“not page 1–2” = not on the Google pages checked</span>
+        </div>
+        {compared.length === 0 && (
+          <p className="muted-text">
+            {competitors.length > 0
+              ? 'None of these competitors are in the same suburb or pincode. Turn off “Local competitors only” below to compare with them anyway.'
+              : 'No business showed up for more than one keyword, so there are no clear search competitors yet.'}
+          </p>
+        )}
+        <div className="table-scroll">
+          <table className="data-table kw-table">
+            <thead>
+              <tr>
+                <th scope="col">Keyword</th>
+                <th scope="col" className="data-table__self-col">
+                  {analysis.business.name}
+                </th>
+                {compared.map((c) => (
+                  <th key={c.domain} scope="col">
+                    {c.domain}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {report.keywords.map((k) => (
+                <tr key={k.keyword}>
+                  <th scope="row">{k.keyword}</th>
+                  <td className="data-table__self-col">
+                    <Position value={k.position} ranking={k} />
+                  </td>
+                  {compared.map((c) => (
+                    <td key={c.domain}>
+                      <Position value={positionOf(k, c.domain)} ranking={k} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {compared.length > 0 && (
+          <p className="muted-text panel__fineprint">
+            Competitors are the businesses that appear most often in these results ({compared
+              .map((c) => `${c.domain}: ${c.keywordCount} keywords, avg #${c.averagePosition}`)
+              .join('; ')}
+            ). Directories, social networks and marketplaces are left out. Positions count organic results only; ads and the map
+            pack are excluded, and results can differ slightly by searcher location.
+          </p>
+        )}
+      </section>
+
       {competitors.length > 0 && (
         <section className="panel" aria-labelledby="kw-where">
           <div className="panel__head">
@@ -569,68 +626,11 @@ function KeywordResults({ analysis, report }: { analysis: MarketingAnalysis; rep
           {loc.localOnly && Object.keys(loc.locations).length > 0 && (
             <p className="muted-text panel__fineprint">
               Greyed-out competitors are more than 15 km away (or only in the same state) and are left out of the comparison and the
-              per-location leaders below. “Address not found” is kept: the site may show its address only with JavaScript.
+              per-location leaders above. “Address not found” is kept: the site may show its address only with JavaScript.
             </p>
           )}
         </section>
       )}
-
-      <section className="panel" aria-labelledby="kw-compare">
-        <div className="panel__head">
-          <h2 id="kw-compare" className="panel__title">
-            You vs {loc.localOnly && Object.keys(loc.locations).length > 0 ? 'local ' : ''}search competitors
-          </h2>
-          <span className="panel__note">“not p1–2” = not on the Google pages checked</span>
-        </div>
-        {compared.length === 0 && (
-          <p className="muted-text">
-            {competitors.length > 0
-              ? 'None of these competitors are in the same suburb or pincode. Turn off “Local competitors only” to compare with them anyway.'
-              : 'No business showed up for more than one keyword, so there are no clear search competitors yet.'}
-          </p>
-        )}
-        <div className="table-scroll">
-          <table className="data-table kw-table">
-            <thead>
-              <tr>
-                <th scope="col">Keyword</th>
-                <th scope="col" className="data-table__self-col">
-                  {analysis.business.name}
-                </th>
-                {compared.map((c) => (
-                  <th key={c.domain} scope="col">
-                    {c.domain}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {report.keywords.map((k) => (
-                <tr key={k.keyword}>
-                  <th scope="row">{k.keyword}</th>
-                  <td className="data-table__self-col">
-                    <Position value={k.position} ranking={k} />
-                  </td>
-                  {compared.map((c) => (
-                    <td key={c.domain}>
-                      <Position value={positionOf(k, c.domain)} ranking={k} />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {compared.length > 0 && (
-          <p className="muted-text panel__fineprint">
-            Competitors are the businesses that appear most often in these results ({compared
-              .map((c) => `${c.domain}: ${c.keywordCount} keywords, avg #${c.averagePosition}`)
-              .join('; ')}
-            ). Directories, social networks and marketplaces are left out. Positions count organic results only; ads and the map
-            pack are excluded, and results can differ slightly by searcher location.
-          </p>
-        )}
-      </section>
 
       <section className="panel" aria-labelledby="kw-serps">
         <h2 id="kw-serps" className="panel__title">
@@ -689,7 +689,7 @@ function leadersByPlace(report: KeywordReport, places: string[], include: (domai
   })
 }
 
-function Position({ value, ranking }: { value: number | null; ranking: KeywordRanking }) {
+export function Position({ value, ranking }: { value: number | null; ranking: KeywordRanking }) {
   if (value === null) return <span className="kw-pos kw-pos--none">{notFoundText(ranking)}</span>
   const page = pageOf(ranking, value)
   const tone = value <= 3 ? 'good' : page === 1 ? 'info' : 'attention'
@@ -699,7 +699,7 @@ function Position({ value, ranking }: { value: number | null; ranking: KeywordRa
       title={`Google page ${page}${value === ranking.position && ranking.rankingDisplay ? ` · ranking page: ${ranking.rankingDisplay}` : ''}`}
     >
       #{value}
-      <span className="kw-pos__page"> · p{page}</span>
+      <span className="kw-pos__page"> · page {page}</span>
     </span>
   )
 }

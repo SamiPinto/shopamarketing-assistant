@@ -1,6 +1,8 @@
 import type { AiGap, CategoryId, CategoryStatus, Check, MarketingAnalysis } from '../types/analysis'
 import type { ClientImprovement, ClientReport, ComparisonRow, GlanceItem, GlanceStatus } from '../types/clientReport'
 import type { WebsiteIntel } from '../types/intel'
+import type { KeywordReport } from '../types/keywords'
+import { pageOf } from './keywordService'
 import { formatDate, listJoin, plural } from '../utils/format'
 import { AI_CRAWLERS, PRIMARY_CTA_INTENTS, SOCIAL_LABELS } from '../utils/signals'
 import { hasPhysicalFootprint } from './analysis/business'
@@ -509,7 +511,7 @@ export interface ClientReportExtras {
 
 export function buildClientReport(
   a: MarketingAnalysis,
-  settings: { preparedBy: string; contactLine: string },
+  settings: { contactLine: string },
   extras: ClientReportExtras = {},
 ): ClientReport {
   const intel = extras.intel ?? null
@@ -532,7 +534,6 @@ export function buildClientReport(
     business: a.business.name,
     website: a.business.domain,
     date: formatDate(a.analysedAt),
-    preparedBy: settings.preparedBy.trim() || null,
     contactLine: settings.contactLine.trim() || null,
     intro: evidenced
       ? `We reviewed the homepage of ${a.business.domain} and found ${plural(evidenced, 'practical improvement')} that could help it attract and convert more customers.`
@@ -545,11 +546,6 @@ export function buildClientReport(
     glance,
     strengths,
     improvements,
-    nextSteps: [
-      'A free 30-minute strategy call to walk through these findings',
-      'A full audit of your website, Google presence and competitors',
-      'A tailored plan with clear priorities and options to suit your budget',
-    ],
     disclaimer: `This snapshot is based on an automated review of publicly visible information on your homepage on ${formatDate(a.analysedAt)}. Some items may exist elsewhere on your website or online. It is a starting point for discussion, not a full audit, and no results are guaranteed.`,
   }
 }
@@ -558,7 +554,7 @@ export function clientReportToText(r: ClientReport): string {
   return [
     'SHOPA MARKETING — WEBSITE OPPORTUNITY SNAPSHOT',
     `Prepared for: ${r.business} (${r.website})`,
-    `Date: ${r.date}${r.preparedBy ? ` · Prepared by: ${r.preparedBy}` : ''}`,
+    `Date: ${r.date}`,
     '',
     r.intro,
     '',
@@ -583,21 +579,34 @@ export function clientReportToText(r: ClientReport): string {
       `   How Shopa can help: ${i.howShopaHelps}`,
     ]),
     '',
-    'NEXT STEPS',
-    ...r.nextSteps.map((s, n) => `${n + 1}. ${s}`),
-    ...(r.contactLine ? ['', r.contactLine] : []),
+    ...(r.contactLine ? [r.contactLine, ''] : []),
     '',
     r.disclaimer,
   ].join('\n')
 }
 
-export function talkingPointsToText(r: ClientReport): string {
+/** `seoPoint` (from the last SEO ranking check) comes last, after the improvements. */
+export function talkingPointsToText(r: ClientReport, seoPoint: string | null = null): string {
+  const points = [...r.improvements.map((i) => i.talkingPoint), ...(seoPoint ? [seoPoint] : [])]
   return [
     `Talking points — ${r.business}`,
     '',
     'Opening pitch:',
     ...r.pitch,
     '',
-    ...r.improvements.map((i, n) => `${n + 1}. ${i.talkingPoint}`),
+    ...points.map((p, n) => `${n + 1}. ${p}`),
   ].join('\n')
+}
+
+/**
+ * A talking point from the last SEO ranking check, only when the business is on
+ * page 1 for none of the searches checked. Null when no check has been run or it
+ * is on page 1 for any search.
+ */
+export function seoTalkingPoint(a: MarketingAnalysis, report: KeywordReport | null): string | null {
+  const rankings = report?.keywords.filter((k) => !k.error) ?? []
+  if (rankings.length === 0) return null
+  if (rankings.some((k) => k.position !== null && pageOf(k, k.position) === 1)) return null
+  const searches = plural(rankings.length, 'Google search', 'Google searches')
+  return `We checked ${searches} your customers make, and ${a.business.name} isn’t on page 1 for ${rankings.length === 1 ? 'it' : 'any of them'}. Those customers are going to competitors, and better SEO can win them back.`
 }

@@ -38,7 +38,6 @@ export interface ClientReport {
   business: string
   website: string
   date: string
-  preparedBy: string | null
   contactLine: string | null
   intro: string
   /** Two-line sales pitch: diagnosis, then the offer. */
@@ -48,6 +47,5 @@ export interface ClientReport {
   glance: GlanceItem[]
   strengths: string[]
   improvements: ClientImprovement[]
-  nextSteps: string[]
   disclaimer: string
 }

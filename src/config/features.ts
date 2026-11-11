@@ -15,7 +15,7 @@ export const FEATURES = {
  * runs and feeds the reports; only the screen and links to it are hidden.
  * Remove an id (and rebuild) to bring the screen back.
  */
-export const HIDDEN_SCREENS: readonly RouteId[] = ['conversion', 'advertising', 'local', 'strategy']
+export const HIDDEN_SCREENS: readonly RouteId[] = ['conversion', 'local', 'strategy']
 
 /** Categories shown in the UI and used for opportunities/services/reports. */
 export const VISIBLE_CATEGORIES: CategoryId[] = CATEGORY_ORDER.filter((id) => id !== 'ooh' || FEATURES.ooh)

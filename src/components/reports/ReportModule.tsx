@@ -1,18 +1,19 @@
 import { useMemo, useState } from 'react'
 import { ClipboardCopy, Copy, Download, FileText, Printer } from 'lucide-react'
-import { useAnalysis } from '../../hooks/analysisContextValue'
 import { useClipboard } from '../../hooks/useClipboard'
+import { useSavedKeywordReport } from '../../hooks/useSavedKeywordReport'
 import type { ModuleProps } from '../../pages/dashboardRoutes'
 import { reportService } from '../../services/reportService'
 import { Button } from '../ui/Button'
 import { EmptyState } from '../ui/Primitives'
 import { ReportDocument } from './ReportDocument'
+import { RankingsTable, SearchCompetitorTables } from './SearchCompetitorTables'
 
 export default function ReportModule({ analysis }: ModuleProps) {
-  const { settings, updateSettings } = useAnalysis()
   const [generated, setGenerated] = useState(false)
   const { copy, copied, failed } = useClipboard()
-  const report = useMemo(() => reportService.build(analysis, settings.preparedBy), [analysis, settings.preparedBy])
+  const keywords = useSavedKeywordReport(analysis)
+  const report = useMemo(() => reportService.build(analysis), [analysis])
 
   return (
     <div className="module">
@@ -24,21 +25,12 @@ export default function ReportModule({ analysis }: ModuleProps) {
           <h1 className="module-header__title">Opportunity Report</h1>
         </div>
         <p className="module-header__description">
-          An internal sales and research report built from the detected signals. It makes no unsupported promises and
-          clearly separates potential service fit from confirmed need.
+          An internal sales and research report built from the detected signals: an executive summary, website findings,
+          and the SEO problems with Google rankings and competitors. It makes no unsupported promises.
         </p>
       </header>
 
       <div className="report-toolbar no-print">
-        <label className="field field--inline">
-          <span className="field__label">Prepared by</span>
-          <input
-            type="text"
-            value={settings.preparedBy}
-            placeholder="Your name (optional)"
-            onChange={(e) => void updateSettings({ preparedBy: e.target.value })}
-          />
-        </label>
         {generated && (
           <div className="button-row">
             <Button size="sm" icon={Copy} onClick={() => void copy('summary', reportService.summary(analysis))}>
@@ -68,7 +60,23 @@ export default function ReportModule({ analysis }: ModuleProps) {
       )}
 
       {generated ? (
-        <ReportDocument report={report} />
+        <ReportDocument
+          report={report}
+          extras={{
+            seo: keywords && (
+              <>
+                <RankingsTable report={keywords} sectionClass="report-document__sub" headingClass="report-document__h3" heading="h3" />
+                <SearchCompetitorTables
+                  analysis={analysis}
+                  report={keywords}
+                  sectionClass="report-document__sub"
+                  headingClass="report-document__h3"
+                  heading="h3"
+                />
+              </>
+            ),
+          }}
+        />
       ) : (
         <section className="panel no-print">
           <EmptyState
@@ -80,8 +88,8 @@ export default function ReportModule({ analysis }: ModuleProps) {
               </Button>
             }
           >
-            Includes an executive summary, findings for each category, potential Shopa services,
-            next steps and the information still required. Print to save as PDF.
+            Includes an executive summary, website findings, and the SEO problems with the latest Google rankings and
+            competitors. Print to save as PDF.
           </EmptyState>
         </section>
       )}

@@ -1,9 +1,7 @@
 import type { CategoryId, MarketingAnalysis } from '../types/analysis'
-import type { OpportunityReport, ReportSection } from '../types/misc'
+import type { OpportunityReport, ReportItem, ReportSection } from '../types/misc'
 import { formatDate, lowerFirst, slugify } from '../utils/format'
 import { countSignals } from './analysis/opportunities'
-import { OOH_REQUIRED_INFORMATION } from '../data/oohEnvironments'
-import { FEATURES } from '../config/features'
 
 const STATUS_WORD: Record<string, string> = {
   good: '✓',
@@ -12,75 +10,46 @@ const STATUS_WORD: Record<string, string> = {
   unknown: '?',
 }
 
-function findings(analysis: MarketingAnalysis, id: CategoryId): ReportSection {
+const isNegative = (status: ReportItem['status']) => status === 'attention' || status === 'not-detected'
+
+/** A category's checks; `negativesOnly` keeps just the problems found. */
+function findings(analysis: MarketingAnalysis, id: CategoryId, negativesOnly = false): ReportSection {
   const category = analysis.categories[id]
+  const checks = negativesOnly ? category.checks.filter((c) => isNegative(c.status)) : category.checks
+  // The report leaves out the "Website upgrade opportunity: … (…)." sentence, also in saved analyses.
+  const summary = category.summary.replace(/\s*Website upgrade opportunity: [^(]*\([^)]*\)\./, '').trim()
   return {
     id,
-    title: `${category.label} findings`,
-    paragraphs: [category.summary],
-    bullets: category.checks.map((c) => `${STATUS_WORD[c.status]} ${c.label}: ${c.detail}`),
+    title: negativesOnly ? `${category.label}: what needs fixing` : `${category.label} findings`,
+    paragraphs: summary ? [summary] : [],
+    items: checks.map((c) => ({ status: c.status, label: c.label, detail: c.detail })),
   }
 }
 
 /**
  * Builds the internal opportunity report. Wording stays factual: findings are
- * "detected"/"not detected", services are "potential fit" — no promises.
+ * "detected"/"not detected" — no promises.
  */
-export function buildReport(analysis: MarketingAnalysis, preparedBy: string | null): OpportunityReport {
-  const { business, insight, services } = analysis
+export function buildReport(analysis: MarketingAnalysis): OpportunityReport {
+  const { business, insight } = analysis
   const signals = countSignals(analysis.opportunities)
 
   const sections: ReportSection[] = [
     {
       id: 'summary',
-      title: 'Executive summary',
+      title: `Executive summary — ${signals} opportunity signals`,
       paragraphs: [
-        ...insight.summary,
+        // Analyses saved before the wording changed still say "marketing opportunity signals".
+        ...insight.summary.map((p) => p.replace(/ marketing opportunity signal/g, ' opportunity signal')),
         `Business: ${business.name}${business.industry ? ` · Industry: ${business.industry.label} (${lowerFirst(business.industry.basis)})` : ''}${business.location ? ` · Location: ${business.location.label}` : ''}.`,
       ],
-      bullets: analysis.opportunities
+      items: analysis.opportunities
         .filter((o) => o.certainty !== 'research')
         .slice(0, 5)
-        .map((o) => `${o.title} — ${o.detail}`),
+        .map((o) => ({ label: o.title, detail: o.detail })),
     },
     findings(analysis, 'website'),
-    findings(analysis, 'seo'),
-    findings(analysis, 'conversion'),
-    findings(analysis, 'social'),
-    findings(analysis, 'advertising'),
-    findings(analysis, 'local'),
-    ...(FEATURES.ooh ? [{
-      id: 'ooh',
-      title: 'OOH considerations',
-      paragraphs: [
-        analysis.categories.ooh.summary,
-        'No OOH inventory, pricing or audience figures are included. These require media owner or OOH data provider input.',
-      ],
-      bullets: OOH_REQUIRED_INFORMATION.map((i) => `Required: ${i}`),
-    }] : []),
-    {
-      id: 'services',
-      title: 'Potential Shopa services',
-      paragraphs: [
-        services.length
-          ? 'The following services show a potential fit based on detected signals. These are not confirmed needs.'
-          : 'No service showed a clear potential fit from the signals on this page.',
-      ],
-      bullets: services.map((s) => `${s.label} (${s.strength === 'strong-signal' ? 'strong signal' : 'worth exploring'}) — ${s.reason}`),
-    },
-    {
-      id: 'next-steps',
-      title: 'Recommended next steps',
-      bullets: [
-        ...insight.investigate,
-        'Validate findings across the wider site and with client data before making recommendations.',
-      ],
-    },
-    {
-      id: 'missing',
-      title: 'Information required for deeper analysis',
-      bullets: insight.missingInformation,
-    },
+    findings(analysis, 'seo', true),
   ]
 
   return {
@@ -88,9 +57,12 @@ export function buildReport(analysis: MarketingAnalysis, preparedBy: string | nu
     business: business.name,
     website: business.url,
     analysisDate: formatDate(analysis.analysedAt),
-    preparedBy: preparedBy?.trim() || null,
-    sections: sections.map((s) => (s.id === 'summary' ? { ...s, title: `Executive summary — ${signals} opportunity signals` } : s)),
+    sections,
   }
+}
+
+function itemText(item: ReportItem): string {
+  return `${item.status ? `${STATUS_WORD[item.status]} ` : ''}${item.label}: ${item.detail}`
 }
 
 export function reportToText(report: OpportunityReport): string {
@@ -101,7 +73,6 @@ export function reportToText(report: OpportunityReport): string {
     `Business: ${report.business}`,
     `Website: ${report.website}`,
     `Analysis date: ${report.analysisDate}`,
-    ...(report.preparedBy ? [`Prepared by: ${report.preparedBy}`] : []),
     'Internal research document — findings are based on publicly visible page signals.',
   ]
 
@@ -109,7 +80,7 @@ export function reportToText(report: OpportunityReport): string {
     '',
     s.title.toUpperCase(),
     ...(s.paragraphs ?? []),
-    ...(s.bullets ?? []).map((b) => `- ${b}`),
+    ...(s.items ?? []).map((i) => `- ${itemText(i)}`),
   ])
   return [...header, ...body].join('\n')
 }
@@ -120,14 +91,13 @@ export function reportToMarkdown(report: OpportunityReport): string {
     `**Business:** ${report.business}  `,
     `**Website:** ${report.website}  `,
     `**Analysis date:** ${report.analysisDate}  `,
-    report.preparedBy ? `**Prepared by:** ${report.preparedBy}  ` : '',
     '',
     '_Internal research document — findings are based on publicly visible page signals._',
   ]
   for (const s of report.sections) {
     lines.push('', `## ${s.title}`, '')
     for (const p of s.paragraphs ?? []) lines.push(p, '')
-    for (const b of s.bullets ?? []) lines.push(`- ${b}`)
+    for (const i of s.items ?? []) lines.push(`- ${i.status ? `${STATUS_WORD[i.status]} ` : ''}**${i.label}:** ${i.detail}`)
   }
   return lines.filter((l, i, arr) => !(l === '' && arr[i - 1] === '')).join('\n')
 }

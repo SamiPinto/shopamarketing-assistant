@@ -2,14 +2,16 @@ import { useMemo } from 'react'
 import { ClipboardCopy, Copy, Download, MessageSquareQuote, Printer } from 'lucide-react'
 import { useAnalysis } from '../../hooks/analysisContextValue'
 import { useClipboard } from '../../hooks/useClipboard'
+import { useSavedKeywordReport } from '../../hooks/useSavedKeywordReport'
 import { useCompetitorLinks } from '../../hooks/useCompetitorLinks'
 import { useWebsiteIntel } from '../../hooks/useWebsiteIntel'
 import type { ModuleProps } from '../../pages/dashboardRoutes'
-import { buildClientReport, clientReportToText, talkingPointsToText } from '../../services/clientReportService'
+import { buildClientReport, clientReportToText, seoTalkingPoint, talkingPointsToText } from '../../services/clientReportService'
 import { downloadTextFile } from '../../services/reportService'
 import { slugify } from '../../utils/format'
 import { Button } from '../ui/Button'
 import { ClientReportDocument } from './ClientReportDocument'
+import { SearchCompetitorTables } from './SearchCompetitorTables'
 
 export default function ClientReportModule({ analysis }: ModuleProps) {
   const { settings, updateSettings } = useAnalysis()
@@ -20,26 +22,20 @@ export default function ClientReportModule({ analysis }: ModuleProps) {
     () =>
       buildClientReport(
         analysis,
-        { preparedBy: settings.preparedBy, contactLine: settings.contactLine },
+        { contactLine: settings.contactLine },
         { intel, intelLoading: loading, competitors: linked },
       ),
-    [analysis, settings.preparedBy, settings.contactLine, intel, loading, linked],
+    [analysis, settings.contactLine, intel, loading, linked],
   )
-  const talkingPoints = talkingPointsToText(report)
+  const keywords = useSavedKeywordReport(analysis)
+  // Only once an SEO ranking check has been run for this site.
+  const seoPoint = useMemo(() => seoTalkingPoint(analysis, keywords), [analysis, keywords])
+  const talkingPoints = talkingPointsToText(report, seoPoint)
 
   return (
     <div className="module client-module">
       <div className="report-toolbar no-print">
         <div className="report-toolbar__fields">
-          <label className="field field--inline">
-            <span className="field__label">Prepared by</span>
-            <input
-              type="text"
-              value={settings.preparedBy}
-              placeholder="Your name"
-              onChange={(e) => void updateSettings({ preparedBy: e.target.value })}
-            />
-          </label>
           <label className="field field--inline">
             <span className="field__label">Contact</span>
             <input
@@ -75,7 +71,19 @@ export default function ClientReportModule({ analysis }: ModuleProps) {
       )}
 
       <div className="client-layout">
-        <ClientReportDocument report={report} />
+        <ClientReportDocument
+          report={report}
+          search={
+            keywords && (
+              <SearchCompetitorTables
+                analysis={analysis}
+                report={keywords}
+                sectionClass="client-report__section"
+                headingClass="client-report__h2"
+              />
+            )
+          }
+        />
 
         <aside className="talking no-print" aria-labelledby="talking-title">
           <div className="talking__head">
@@ -95,6 +103,12 @@ export default function ClientReportModule({ analysis }: ModuleProps) {
                 <p>“{i.talkingPoint}”</p>
               </li>
             ))}
+            {seoPoint && (
+              <li>
+                <span className="talking__num">{report.improvements.length + 1}</span>
+                <p>“{seoPoint}”</p>
+              </li>
+            )}
           </ol>
           <Button block icon={Copy} onClick={() => void copy('talking', talkingPoints)}>
             {copied === 'talking' ? 'Copied' : 'Copy Talking Points'}

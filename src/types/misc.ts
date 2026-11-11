@@ -1,4 +1,4 @@
-import type { ServiceId } from './analysis'
+import type { CheckStatus, ServiceId } from './analysis'
 import type { PageExtraction } from './page'
 
 /* ---------- Strategy ---------- */
@@ -20,11 +20,19 @@ export interface MarketingStrategy {
 
 /* ---------- Report ---------- */
 
+/** One finding in the report: a bold label, then what was found. */
+export interface ReportItem {
+  /** Check outcome, shown as a coloured marker; absent for plain points. */
+  status?: CheckStatus
+  label: string
+  detail: string
+}
+
 export interface ReportSection {
   id: string
   title: string
   paragraphs?: string[]
-  bullets?: string[]
+  items?: ReportItem[]
 }
 
 export interface OpportunityReport {
@@ -32,15 +40,12 @@ export interface OpportunityReport {
   business: string
   website: string
   analysisDate: string
-  preparedBy: string | null
   sections: ReportSection[]
 }
 
 /* ---------- Settings ---------- */
 
 export interface Settings {
-  /** Shown on generated reports. Stored locally only. */
-  preparedBy: string
   /** Contact details printed on the client report, e.g. email · phone. */
   contactLine: string
   /** Look up domain, hosting and archive data from free public services. */
@@ -50,7 +55,6 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  preparedBy: '',
   contactLine: '',
   onlineLookups: true,
   pageSpeedApiKey: '',
